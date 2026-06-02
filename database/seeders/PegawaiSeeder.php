@@ -60,14 +60,14 @@ class PegawaiSeeder extends Seeder
 
             // Insert per 500 baris
             if (count($chunk) >= 500) {
-                Pegawai::insert($chunk);
+                Pegawai::insertOrIgnore($chunk);
                 $chunk = [];
             }
         }
 
         // Sisa chunk terakhir
         if (!empty($chunk)) {
-            Pegawai::insert($chunk);
+            Pegawai::insertOrIgnore($chunk);
         }
 
         fclose($file);
