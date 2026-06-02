@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pegawai', function (Blueprint $table) {
-            $table->dropUnique(['nip']);
-            $table->index('nip');
-        });
+        // No-op: unique constraint sudah tidak ada di migration 050000
+        // Unique akan ditambahkan kembali di migration 2026_06_02_070000
     }
 
     /**
@@ -22,9 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pegawai', function (Blueprint $table) {
-            $table->dropIndex(['nip']);
-            $table->unique('nip');
-        });
+        // No-op
     }
 };
