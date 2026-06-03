@@ -27,6 +27,31 @@
                     </div>
                 @endif
 
+                <!-- Filter OPD -->
+                @can('admin')
+                <form method="GET" class="row g-2 mb-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="opd" class="form-label fw-medium">Filter OPD</label>
+                        <select name="opd" id="opd" class="form-select form-select-sm"
+                                onchange="this.form.submit()">
+                            <option value="">-- Semua OPD --</option>
+                            @foreach ($opdList as $opd)
+                                <option value="{{ $opd }}" {{ request('opd') == $opd ? 'selected' : '' }}>
+                                    {{ $opd }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @if (request('opd'))
+                        <div class="col-md-2 d-flex align-items-end">
+                            <a href="{{ route('pegawai.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bx bx-x"></i> Reset
+                            </a>
+                        </div>
+                    @endif
+                </form>
+                @endcan
+
                 <div class="table-responsive">
                     <table id="pegawaiTable" class="table table-hover">
                         <thead>

@@ -13,18 +13,25 @@ class PegawaiController extends Controller
     /**
      * Display a listing of pegawai filtered by OPD.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
+        // Ambil daftar OPD untuk filter (distinct dari tabel pegawai)
+        $opdList = Pegawai::distinct()->pluck('opd')->filter()->sort()->values();
+
         // Admin bisa lihat semua, OPD hanya lihat pegawai sesuai OPD-nya
         if ($user?->hasRole('admin')) {
-            $pegawai = Pegawai::latest()->get();
+            $query = Pegawai::query();
+            if ($request->filled('opd')) {
+                $query->where('opd', $request->opd);
+            }
+            $pegawai = $query->latest()->get();
         } else {
             $pegawai = Pegawai::where('opd', $user->name)->latest()->get();
         }
 
-        return view('pegawai.index', compact('pegawai'));
+        return view('pegawai.index', compact('pegawai', 'opdList'));
     }
 
     /**

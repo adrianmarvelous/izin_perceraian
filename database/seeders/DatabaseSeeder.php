@@ -34,5 +34,7 @@ class DatabaseSeeder extends Seeder
         $this->call(OPDSeeder::class);
 
         $this->call(PegawaiSeeder::class);
+
+        $this->call(MasterOpdSeeder::class);
     }
 }

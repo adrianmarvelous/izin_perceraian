@@ -100,14 +100,6 @@
                         </a>
                     </li>
 
-                    <!-- Pegawai -->
-                    <li class="menu-item {{ request()->routeIs('pegawai.*') ? 'active' : '' }}">
-                        <a href="{{ route('pegawai.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-id-card"></i>
-                            <div data-i18n="Pegawai">Pegawai</div>
-                        </a>
-                    </li>
-
                     <!-- Izin Perceraian -->
                     <li class="menu-item {{ request()->routeIs('perceraian.*') ? 'active' : '' }}">
                         <a href="{{ route('perceraian.index') }}" class="menu-link">
@@ -115,16 +107,6 @@
                             <div data-i18n="Izin Perceraian">Izin Perceraian</div>
                         </a>
                     </li>
-
-                    <!-- Users -->
-                    @can('admin')
-                    <li class="menu-item {{ request()->routeIs('users') ? 'active' : '' }}">
-                        <a href="{{ route('users') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-group"></i>
-                            <div data-i18n="Users">Users</div>
-                        </a>
-                    </li>
-                    @endcan
 
                     <!-- Profile -->
                     <li class="menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
@@ -136,12 +118,34 @@
 
                     @can('admin')
                     <li class="menu-header small text-uppercase mt-3">
-                        <span class="menu-header-text">Administration</span>
+                        <span class="menu-header-text">Data Master</span>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+                    <!-- Master Pegawai -->
+                    <li class="menu-item {{ request()->routeIs('pegawai.*') ? 'active' : '' }}">
+                        <a href="{{ route('pegawai.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-id-card"></i>
+                            <div data-i18n="Master Pegawai">Master Pegawai</div>
+                        </a>
+                    </li>
+                    <!-- Master OPD -->
+                    <li class="menu-item {{ request()->routeIs('master-opd.*') ? 'active' : '' }}">
+                        <a href="{{ route('master-opd.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-building"></i>
+                            <div data-i18n="Master OPD">Master OPD</div>
+                        </a>
+                    </li>
+                    <!-- Master Unit Kerja -->
+                    <li class="menu-item {{ request()->routeIs('master-unit-kerja.*') ? 'active' : '' }}">
+                        <a href="{{ route('master-unit-kerja.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-briefcase"></i>
+                            <div data-i18n="Master Unit Kerja">Master Unit Kerja</div>
+                        </a>
+                    </li>
+                    <!-- Users -->
+                    <li class="menu-item {{ request()->routeIs('users') ? 'active' : '' }}">
                         <a href="{{ route('users') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-shield"></i>
-                            <div data-i18n="Manage Users">Manage Users</div>
+                            <i class="menu-icon tf-icons bx bx-group"></i>
+                            <div data-i18n="Users">Users</div>
                         </a>
                     </li>
                     @endcan

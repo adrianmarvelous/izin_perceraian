@@ -4,7 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/dashboard');
 });
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
@@ -20,6 +20,12 @@ Route::middleware('auth')->group(function () {
 
     // Pegawai CRUD
     Route::resource('pegawai', App\Http\Controllers\PegawaiController::class);
+
+    // Master OPD CRUD (hanya akses via role admin)
+    Route::middleware('can:admin')->group(function () {
+        Route::resource('master-opd', App\Http\Controllers\MasterOpdController::class);
+        Route::resource('master-unit-kerja', App\Http\Controllers\MasterUnitKerjaController::class);
+    });
 
     // Izin Perceraian
     Route::prefix('perceraian')->name('perceraian.')->group(function () {
