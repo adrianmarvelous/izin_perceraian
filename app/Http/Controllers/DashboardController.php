@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\IzinPerceraian;
 use App\Models\Pegawai;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -41,6 +42,8 @@ class DashboardController extends Controller
                 ->groupBy('agama')
                 ->orderByDesc('total')
                 ->get();
+
+            $izinCount = IzinPerceraian::count();
         } else {
             $pegawaiPerOpd = collect();
             $statusPeg = Pegawai::selectRaw('status_peg, COUNT(*) as total')
@@ -63,6 +66,10 @@ class DashboardController extends Controller
                 ->get();
 
             $totalPegawai = Pegawai::where('opd', $user->name)->count();
+
+            $izinCount = IzinPerceraian::whereHas('pegawai', function ($q) use ($user) {
+                $q->where('opd', $user->name);
+            })->count();
         }
 
         // 5 user terbaru
@@ -74,6 +81,7 @@ class DashboardController extends Controller
             'statusPeg',
             'jkStats',
             'agamaStats',
+            'izinCount',
             'latestUsers'
         ));
     }

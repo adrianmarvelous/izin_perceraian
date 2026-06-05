@@ -73,6 +73,9 @@
                                                 <a href="{{ route('perceraian.dokumen', $d) }}" class="dropdown-item">
                                                     <i class="bx bx-file me-1"></i> Dokumen
                                                 </a>
+                                                <a href="{{ route('perceraian.print', $d) }}" target="_blank" class="dropdown-item">
+                                                    <i class="bx bx-printer me-1"></i> Cetak PDF
+                                                </a>
                                                 <a href="{{ route('perceraian.edit', $d) }}" class="dropdown-item">
                                                     <i class="bx bx-edit-alt me-1"></i> Edit
                                                 </a>

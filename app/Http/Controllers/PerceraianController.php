@@ -156,6 +156,14 @@ class PerceraianController extends Controller
         return redirect()->route('perceraian.index')->with('success', 'Izin perceraian berhasil diajukan.');
     }
 
+    // Print bukti pengajuan
+    public function printPdf(IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+        $perceraian->load('pegawai', 'dokumen', 'creator');
+        return view('perceraian.print', compact('perceraian'));
+    }
+
     private function authorizeAccess(IzinPerceraian $perceraian): void
     {
         $user = Auth::user();

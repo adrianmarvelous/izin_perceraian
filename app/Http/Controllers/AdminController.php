@@ -46,4 +46,16 @@ class AdminController extends Controller
 
         return back()->with('success', 'User berhasil dihapus.');
     }
+
+    /**
+     * Reset user password to default 'password'.
+     */
+    public function resetPassword(User $user)
+    {
+        $user->update([
+            'password' => 'password',
+        ]);
+
+        return back()->with('success', "Password user {$user->name} berhasil direset ke 'password'.");
+    }
 }

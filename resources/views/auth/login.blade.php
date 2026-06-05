@@ -45,7 +45,7 @@
                 <div class="card-body">
                     <!-- Logo -->
                     <div class="app-brand justify-content-center">
-                        <a href="{{ route('dashboard') }}" class="app-brand-link gap-2">
+                        {{-- <a href="{{ route('dashboard') }}" class="app-brand-link gap-2">
                             <span class="app-brand-logo demo">
                                 <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                     <defs>
@@ -72,11 +72,11 @@
                                 </svg>
                             </span>
                             <span class="app-brand-text demo menu-text fw-bold">Sneat</span>
-                        </a>
+                        </a> --}}
                     </div>
 
-                    <h4 class="mb-1 pt-2">Welcome to Sneat! 👋</h4>
-                    <p class="mb-4">Please sign-in to your account and start the adventure</p>
+                    <h2 class="mb-1 pt-2">Izin Perceraian</h2>
+                    <p class="mb-4">Pemerintah Kota Mojokerto</p>
 
                     <form method="POST" action="{{ route('login') }}" class="mb-3">
                         @csrf
@@ -117,12 +117,12 @@
                         <button type="submit" class="btn btn-primary d-grid w-100">Sign in</button>
                     </form>
 
-                    <p class="text-center">
+                    {{-- <p class="text-center">
                         <span>New on our platform?</span>
                         <a href="{{ route('register') }}">
                             <span>Create an account</span>
                         </a>
-                    </p>
+                    </p> --}}
                 </div>
             </div>
         </div>

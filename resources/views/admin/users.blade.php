@@ -35,7 +35,7 @@
                                 <th>#</th>
                                 <th>Name</th>
                                 <th>Username</th>
-                                <th>Email</th>
+                                {{-- <th>Email</th> --}}
                                 <th>Role</th>
                                 <th>Registered</th>
                                 @can('admin')
@@ -48,17 +48,10 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-sm me-3">
-                                                <img src="{{ asset('templete/sneat/assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle" />
-                                            </div>
-                                            <div>
-                                                <strong>{{ $user->name }}</strong>
-                                            </div>
-                                        </div>
+                                        <strong>{{ $user->name }}</strong>
                                     </td>
                                     <td><code>{{ $user->username }}</code></td>
-                                    <td>{{ $user->email }}</td>
+                                    {{-- <td>{{ $user->email }}</td> --}}
                                     <td>
                                         @php
                                             $roleBadge = [
@@ -82,6 +75,13 @@
                                                 <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#roleModal{{ $user->id }}">
                                                     <i class="bx bx-shield me-1"></i> Change Role
                                                 </button>
+                                                <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" onsubmit="return confirm('Reset password {{ $user->name }} ke \"password\"?')">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="dropdown-item">
+                                                        <i class="bx bx-key me-1"></i> Reset Password
+                                                    </button>
+                                                </form>
                                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Hapus user {{ $user->name }}?')">
                                                     @csrf
                                                     @method('DELETE')

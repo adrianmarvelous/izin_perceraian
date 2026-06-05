@@ -90,21 +90,36 @@
         @error('jabatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
-    <!-- Kode Unit -->
-    <div class="col-md-3">
-        <label for="kode_unit" class="form-label">Kode Unit</label>
-        <input type="text" class="form-control @error('kode_unit') is-invalid @enderror" id="kode_unit" name="kode_unit"
-               value="{{ old('kode_unit', $pegawai->kode_unit ?? '') }}">
-        @error('kode_unit')<div class="invalid-feedback">{{ $message }}</div>@enderror
+    <!-- OPD -->
+    <div class="col-md-4">
+        <label for="opd" class="form-label">OPD <span class="text-danger">*</span></label>
+        <select class="form-select @error('opd') is-invalid @enderror" id="opd" name="opd" {{ Auth::user()->hasRole('admin') ? '' : 'disabled' }}>
+            <option value="">-- Pilih OPD --</option>
+            @foreach ($opdList as $opd)
+                <option value="{{ $opd->nama_opd }}" data-id="{{ $opd->id }}"
+                    {{ old('opd', $pegawai->opd ?? Auth::user()->name) == $opd->nama_opd ? 'selected' : '' }}>
+                    {{ $opd->nama_opd }}
+                </option>
+            @endforeach
+        </select>
+        @if (!Auth::user()->hasRole('admin'))
+            <input type="hidden" name="opd" value="{{ Auth::user()->name }}">
+        @endif
+        @error('opd')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     <!-- Unit Kerja -->
-    <div class="col-md-6">
-        <label for="unit_kerja" class="form-label">Unit Kerja</label>
-        <input type="text" class="form-control @error('unit_kerja') is-invalid @enderror" id="unit_kerja" name="unit_kerja"
-               value="{{ old('unit_kerja', $pegawai->unit_kerja ?? '') }}">
-        @error('unit_kerja')<div class="invalid-feedback">{{ $message }}</div>@enderror
+    <div class="col-md-4">
+        <label for="unit_kerja_id" class="form-label">Unit Kerja</label>
+        <select class="form-select @error('unit_kerja_id') is-invalid @enderror" id="unit_kerja_id" name="unit_kerja_id">
+            <option value="">-- Pilih Unit Kerja --</option>
+        </select>
+        @error('unit_kerja_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
+
+    <!-- Kode Unit & Unit Kerja (hidden, auto-filled via JS) -->
+    <input type="hidden" id="kode_unit" name="kode_unit" value="{{ old('kode_unit', $pegawai->kode_unit ?? '') }}">
+    <input type="hidden" id="unit_kerja" name="unit_kerja" value="{{ old('unit_kerja', $pegawai->unit_kerja ?? '') }}">
 
     <!-- Alamat -->
     <div class="col-12">
@@ -149,3 +164,84 @@
         @error('pekerjaan')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 </div>
+
+@push('scripts')
+<script>
+$(function () {
+    const $opdSelect = $('#opd');
+    const $unitKerjaSelect = $('#unit_kerja_id');
+    const $kodeUnitInput = $('#kode_unit');
+    const $unitKerjaInput = $('#unit_kerja');
+    const pegawaiKodeUnit = '{{ old('kode_unit', $pegawai->kode_unit ?? '') }}';
+    const pegawaiUnitKerja = '{{ old('unit_kerja', $pegawai->unit_kerja ?? '') }}';
+
+    /**
+     * Load unit kerja berdasarkan OPD yang dipilih.
+     */
+    function loadUnitKerja(opdId, selectedKodeUnit, selectedNamaUnit) {
+        if (!opdId) {
+            $unitKerjaSelect.html('<option value="">-- Pilih Unit Kerja --</option>');
+            $kodeUnitInput.val('');
+            $unitKerjaInput.val('');
+            return;
+        }
+
+        $.getJSON('/get-unit-kerja/' + opdId, function (data) {
+            let options = '<option value="">-- Pilih Unit Kerja --</option>';
+            let found = false;
+            $.each(data, function (i, uk) {
+                const selected = (uk.kode_unit === selectedKodeUnit) ? 'selected' : '';
+                if (selected) found = true;
+                options += '<option value="' + uk.id + '" data-kode="' + uk.kode_unit + '" data-nama="' + uk.nama_unit + '" ' + selected + '>' + uk.nama_unit + ' (' + uk.kode_unit + ')</option>';
+            });
+            $unitKerjaSelect.html(options);
+
+            // Auto-fill hidden fields jika ada yang terpilih
+            const sel = $unitKerjaSelect.find('option:selected');
+            if (sel.val()) {
+                $kodeUnitInput.val(sel.data('kode'));
+                $unitKerjaInput.val(sel.data('nama'));
+            } else if (found && selectedKodeUnit) {
+                $kodeUnitInput.val(selectedKodeUnit);
+                $unitKerjaInput.val(selectedNamaUnit || '');
+            } else {
+                $kodeUnitInput.val('');
+                $unitKerjaInput.val('');
+            }
+        });
+    }
+
+    /**
+     * Ketika OPD berubah, reload unit kerja.
+     */
+    $opdSelect.on('change', function () {
+        const selectedOption = $(this).find('option:selected');
+        const opdId = selectedOption.data('id');
+        loadUnitKerja(opdId, '', '');
+        $kodeUnitInput.val('');
+        $unitKerjaInput.val('');
+    });
+
+    /**
+     * Ketika unit kerja dipilih, isi kode_unit dan unit_kerja.
+     */
+    $unitKerjaSelect.on('change', function () {
+        const selected = $(this).find('option:selected');
+        if (selected.val()) {
+            $kodeUnitInput.val(selected.data('kode'));
+            $unitKerjaInput.val(selected.data('nama'));
+        } else {
+            $kodeUnitInput.val('');
+            $unitKerjaInput.val('');
+        }
+    });
+
+    // Load unit kerja awal jika ada OPD yang sudah terpilih
+    const initialOpd = $opdSelect.find('option:selected');
+    const initialOpdId = initialOpd.data('id');
+    if (initialOpdId) {
+        loadUnitKerja(initialOpdId, pegawaiKodeUnit, pegawaiUnitKerja);
+    }
+});
+</script>
+@endpush

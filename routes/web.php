@@ -20,6 +20,8 @@ Route::middleware('auth')->group(function () {
 
     // Pegawai CRUD
     Route::resource('pegawai', App\Http\Controllers\PegawaiController::class);
+    Route::get('/get-unit-kerja/{opdId}', [App\Http\Controllers\PegawaiController::class, 'getUnitKerja'])
+        ->name('get-unit-kerja');
 
     // Master OPD CRUD (hanya akses via role admin)
     Route::middleware('can:admin')->group(function () {
@@ -38,11 +40,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/{perceraian}/dokumen', [App\Http\Controllers\PerceraianController::class, 'dokumen'])->name('dokumen');
         Route::patch('/{perceraian}/dokumen/{dokumen}', [App\Http\Controllers\PerceraianController::class, 'updateDokumen'])->name('dokumen.update');
         Route::post('/{perceraian}/ajukan', [App\Http\Controllers\PerceraianController::class, 'ajukan'])->name('ajukan');
+        Route::get('/{perceraian}/print', [App\Http\Controllers\PerceraianController::class, 'printPdf'])->name('print');
     });
 });
 
 Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::patch('/users/{user}/role', [App\Http\Controllers\AdminController::class, 'updateRole'])->name('users.role');
+    Route::patch('/users/{user}/reset-password', [App\Http\Controllers\AdminController::class, 'resetPassword'])->name('users.reset-password');
     Route::delete('/users/{user}', [App\Http\Controllers\AdminController::class, 'destroy'])->name('users.destroy');
 });
 

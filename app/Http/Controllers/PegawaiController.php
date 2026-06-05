@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MasterOpd;
+use App\Models\MasterUnitKerja;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,8 +19,8 @@ class PegawaiController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil daftar OPD untuk filter (distinct dari tabel pegawai)
-        $opdList = Pegawai::distinct()->pluck('opd')->filter()->sort()->values();
+        // Ambil daftar OPD dari master_opd untuk filter
+        $opdList = MasterOpd::orderBy('nama_opd')->pluck('nama_opd');
 
         // Admin bisa lihat semua, OPD hanya lihat pegawai sesuai OPD-nya
         if ($user?->hasRole('admin')) {
@@ -39,7 +41,8 @@ class PegawaiController extends Controller
      */
     public function create()
     {
-        return view('pegawai.create');
+        $opdList = MasterOpd::orderBy('nama_opd')->get();
+        return view('pegawai.create', compact('opdList'));
     }
 
     /**
@@ -63,15 +66,16 @@ class PegawaiController extends Controller
             'jabatan'         => ['nullable', 'string', 'max:255'],
             'kode_unit'       => ['nullable', 'string', 'max:50'],
             'unit_kerja'      => ['nullable', 'string', 'max:255'],
+            'opd'             => [$user->hasRole('admin') ? 'required' : 'nullable', 'string', 'max:255'],
             'status_menikah'  => ['nullable', 'string', 'max:50'],
             'nama_pasangan'   => ['nullable', 'string', 'max:255'],
             'tgl_menikah'     => ['nullable', 'date'],
             'pekerjaan'       => ['nullable', 'string', 'max:255'],
         ]);
 
-        $validated['opd'] = $user->hasRole('admin')
-            ? ($request->opd ?? $user->name)
-            : $user->name;
+        if (!$user->hasRole('admin')) {
+            $validated['opd'] = $user->name;
+        }
 
         Pegawai::create($validated);
 
@@ -85,7 +89,8 @@ class PegawaiController extends Controller
     public function edit(Pegawai $pegawai)
     {
         $this->authorizeAccess($pegawai);
-        return view('pegawai.edit', compact('pegawai'));
+        $opdList = MasterOpd::orderBy('nama_opd')->get();
+        return view('pegawai.edit', compact('pegawai', 'opdList'));
     }
 
     /**
@@ -94,6 +99,8 @@ class PegawaiController extends Controller
     public function update(Request $request, Pegawai $pegawai)
     {
         $this->authorizeAccess($pegawai);
+
+        $user = Auth::user();
 
         $validated = $request->validate([
             'nip'             => ['required', 'string', 'max:30'],
@@ -109,11 +116,16 @@ class PegawaiController extends Controller
             'jabatan'         => ['nullable', 'string', 'max:255'],
             'kode_unit'       => ['nullable', 'string', 'max:50'],
             'unit_kerja'      => ['nullable', 'string', 'max:255'],
+            'opd'             => [$user->hasRole('admin') ? 'required' : 'nullable', 'string', 'max:255'],
             'status_menikah'  => ['nullable', 'string', 'max:50'],
             'nama_pasangan'   => ['nullable', 'string', 'max:255'],
             'tgl_menikah'     => ['nullable', 'date'],
             'pekerjaan'       => ['nullable', 'string', 'max:255'],
         ]);
+
+        if (!$user->hasRole('admin')) {
+            $validated['opd'] = $user->name;
+        }
 
         $pegawai->update($validated);
 
@@ -142,5 +154,17 @@ class PegawaiController extends Controller
         if (!$user->hasRole('admin') && $pegawai->opd !== $user->name) {
             abort(403, 'Anda tidak memiliki akses ke data pegawai ini.');
         }
+    }
+
+    /**
+     * Get unit kerja by OPD (for AJAX dependent dropdown).
+     */
+    public function getUnitKerja($opdId)
+    {
+        $unitKerja = MasterUnitKerja::where('opd_id', $opdId)
+            ->orderBy('nama_unit')
+            ->get(['id', 'kode_unit', 'nama_unit']);
+
+        return response()->json($unitKerja);
     }
 }

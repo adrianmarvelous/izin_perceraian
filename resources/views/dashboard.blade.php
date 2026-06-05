@@ -85,6 +85,7 @@
         </div>
     </div>
 
+    @can('admin')
     <div class="col-lg-3 col-md-6 col-6 mb-4">
         <div class="card">
             <div class="card-body">
@@ -99,6 +100,22 @@
             </div>
         </div>
     </div>
+    @else
+    <div class="col-lg-3 col-md-6 col-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <img src="{{ asset('templete/sneat/assets/img/icons/unicons/cc-primary.png') }}" alt="izin" class="rounded" />
+                    </div>
+                </div>
+                <span class="fw-medium d-block mb-1">Izin Perceraian</span>
+                <h3 class="card-title mb-2">{{ number_format($izinCount) }}</h3>
+                <small class="text-warning fw-medium"><i class="bx bx-file"></i> Jumlah pengajuan</small>
+            </div>
+        </div>
+    </div>
+    @endcan
 </div>
 
 <!-- Charts -->
