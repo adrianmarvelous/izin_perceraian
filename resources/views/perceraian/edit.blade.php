@@ -71,7 +71,34 @@
                         <textarea class="form-control @error('catatan') is-invalid @enderror" id="catatan" name="catatan" rows="3">{{ old('catatan', $perceraian->catatan) }}</textarea>
                         @error('catatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+
+                    <div class="mb-3">
+                        <label for="tanggal_pemanggilan" class="form-label">Tanggal Pemanggilan</label>
+                        <input type="date" class="form-control @error('tanggal_pemanggilan') is-invalid @enderror"
+                               id="tanggal_pemanggilan" name="tanggal_pemanggilan"
+                               value="{{ old('tanggal_pemanggilan', $perceraian->tanggal_pemanggilan?->format('Y-m-d')) }}">
+                        @error('tanggal_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="berita_acara_pemanggilan" class="form-label">Berita Acara Pemanggilan</label>
+                        <textarea class="form-control @error('berita_acara_pemanggilan') is-invalid @enderror"
+                                  id="berita_acara_pemanggilan" name="berita_acara_pemanggilan" rows="3">{{ old('berita_acara_pemanggilan', $perceraian->berita_acara_pemanggilan) }}</textarea>
+                        @error('berita_acara_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
                     @endcan
+
+                    @cannot('admin')
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Pemanggilan</label>
+                        <input type="text" class="form-control" value="{{ $perceraian->tanggal_pemanggilan?->format('d M Y') ?? '-' }}" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Berita Acara Pemanggilan</label>
+                        <textarea class="form-control" rows="3" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
+                    </div>
+                    @endcannot
 
                     <div class="mt-4">
                         <button type="submit" class="btn btn-primary"><i class="bx bx-save"></i> Update</button>

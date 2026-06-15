@@ -17,13 +17,6 @@
                 </a>
             </div>
             <div class="card-body">
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
                 <div class="table-responsive">
                     <table id="perceraianTable" class="table table-hover">
                         <thead>
@@ -79,7 +72,7 @@
                                                 <a href="{{ route('perceraian.edit', $d) }}" class="dropdown-item">
                                                     <i class="bx bx-edit-alt me-1"></i> Edit
                                                 </a>
-                                                @if ($d->status == 'draft')
+                                                @if ($d->status == 'draft' && !Auth::user()->hasRole('admin'))
                                                 <form action="{{ route('perceraian.ajukan', $d) }}" method="POST">
                                                     @csrf
                                                     <button type="submit" class="dropdown-item">

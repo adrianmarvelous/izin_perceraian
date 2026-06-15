@@ -14,6 +14,8 @@ class IzinPerceraian extends Model
         'sebagai',
         'status',
         'catatan',
+        'tanggal_pemanggilan',
+        'berita_acara_pemanggilan',
         'created_by',
     ];
 
@@ -22,6 +24,7 @@ class IzinPerceraian extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'tanggal_pemanggilan' => 'date',
         ];
     }
 

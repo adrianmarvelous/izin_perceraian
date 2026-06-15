@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{perceraian}/dokumen/{dokumen}', [App\Http\Controllers\PerceraianController::class, 'updateDokumen'])->name('dokumen.update');
         Route::post('/{perceraian}/ajukan', [App\Http\Controllers\PerceraianController::class, 'ajukan'])->name('ajukan');
         Route::get('/{perceraian}/print', [App\Http\Controllers\PerceraianController::class, 'printPdf'])->name('print');
+        Route::post('/{perceraian}/dokumen/{dokumen}/create-drive-folder', [App\Http\Controllers\PerceraianController::class, 'createDriveFolder'])->name('dokumen.create-drive-folder');
     });
 });
 

@@ -12,13 +12,6 @@
             @csrf
             @method('patch')
 
-            @if (session('status') === 'profile-updated')
-                <div class="alert alert-success alert-dismissible" role="alert">
-                    {{ __('Saved.') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="name" class="form-label">{{ __('Name') }} <span class="text-danger">*</span></label>
@@ -51,11 +44,6 @@
                             </button>
                         </div>
 
-                        @if (session('status') === 'verification-link-sent')
-                            <div class="alert alert-success mt-2 mb-0">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </div>
-                        @endif
                     @endif
                 </div>
             </div>

@@ -33,6 +33,9 @@
 
     @stack('styles')
 
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
     /* Force overlay hidden until toggled by menu button */
     .layout-overlay {
@@ -273,6 +276,64 @@
 
     <!-- Main JS -->
     <script src="{{ asset('templete/sneat/assets/js/main.js') }}"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if (session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonColor: '#696cff',
+            });
+        @endif
+        @if (session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error') }}',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonColor: '#696cff',
+            });
+        @endif
+        @if (session('status') === 'password-updated')
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Password berhasil diperbarui.',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonColor: '#696cff',
+            });
+        @endif
+        @if (session('status') === 'profile-updated')
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Profil berhasil diperbarui.',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonColor: '#696cff',
+            });
+        @endif
+        @if (session('status') === 'verification-link-sent')
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Link verifikasi baru telah dikirim ke email Anda.',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonColor: '#696cff',
+            });
+        @endif
+    });
+    </script>
 
     @stack('scripts')
 </body>

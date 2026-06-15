@@ -19,11 +19,51 @@
                     Status: <span class="badge bg-label-warning">{{ ucfirst($perceraian->status) }}</span>
                 </div>
 
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible">{{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                {{-- Tanggal Pemanggilan & Berita Acara --}}
+                @can('admin')
+                <form action="{{ route('perceraian.update', $perceraian) }}" method="POST" class="mb-4 p-3 border rounded">
+                    @csrf @method('PUT')
+                    <input type="hidden" name="pegawai_id" value="{{ $perceraian->pegawai_id }}">
+                    <input type="hidden" name="nama_pasangan" value="{{ $perceraian->nama_pasangan }}">
+                    <input type="hidden" name="sebagai" value="{{ $perceraian->sebagai }}">
+                    <input type="hidden" name="status" value="{{ $perceraian->status }}">
+                    <input type="hidden" name="catatan" value="{{ $perceraian->catatan }}">
+                    <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label for="tanggal_pemanggilan" class="form-label">Tanggal Pemanggilan</label>
+                            <input type="date" class="form-control form-control-sm @error('tanggal_pemanggilan') is-invalid @enderror"
+                                   id="tanggal_pemanggilan" name="tanggal_pemanggilan"
+                                   value="{{ old('tanggal_pemanggilan', $perceraian->tanggal_pemanggilan?->format('Y-m-d')) }}">
+                            @error('tanggal_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-8 mb-2">
+                            <label for="berita_acara_pemanggilan" class="form-label">Berita Acara Pemanggilan</label>
+                            <textarea class="form-control form-control-sm @error('berita_acara_pemanggilan') is-invalid @enderror"
+                                      id="berita_acara_pemanggilan" name="berita_acara_pemanggilan" rows="2">{{ old('berita_acara_pemanggilan', $perceraian->berita_acara_pemanggilan) }}</textarea>
+                            @error('berita_acara_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
                     </div>
-                @endif
+                    <button type="submit" class="btn btn-sm btn-primary mt-1">
+                        <i class="bx bx-save"></i> Simpan Data Pemanggilan
+                    </button>
+                </form>
+                @else
+                <div class="mb-4 p-3 border rounded">
+                    <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">Tanggal Pemanggilan</label>
+                            <input type="text" class="form-control form-control-sm"
+                                   value="{{ $perceraian->tanggal_pemanggilan?->format('d M Y') ?? '-' }}" readonly>
+                        </div>
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label">Berita Acara Pemanggilan</label>
+                            <textarea class="form-control form-control-sm" rows="2" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                @endcan
 
                 <div class="table-responsive">
                     <table class="table table-bordered">
@@ -57,9 +97,11 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($dok->kode == 'dokumentasi')
+                                        @if (in_array($dok->kode, ['dokumentasi', 'bukti_lain']))
                                             @if ($dok->link)
-                                                <a href="{{ $dok->link }}" target="_blank" class="text-break">{{ $dok->link }}</a>
+                                                <a href="{{ $dok->link }}" target="_blank" class="text-break">
+                                                    <i class="bx bx-folder"></i> {{ $dok->link }}
+                                                </a>
                                             @else
                                                 <em class="text-muted">-</em>
                                             @endif
@@ -95,12 +137,38 @@
                                                 <div class="modal-body">
                                                     <p><strong>{{ $dok->nama_dokumen }}</strong></p>
 
-                                                    @if ($dok->kode == 'dokumentasi')
+                                                    @if (in_array($dok->kode, ['dokumentasi', 'bukti_lain']))
+                                                    <div class="mb-2">
+                                                        <label class="form-label">Link Folder Google Drive</label>
+                                                        <div class="input-group">
+                                                            <input type="url" class="form-control" id="link_{{ $dok->id }}"
+                                                                   name="link" value="{{ $dok->link }}"
+                                                                   placeholder="https://drive.google.com/drive/folders/..."
+                                                                   readonly>
+                                                            @if ($dok->link)
+                                                            <a href="{{ $dok->link }}" target="_blank"
+                                                               class="btn btn-outline-success" title="Buka Folder">
+                                                                <i class="bx bx-folder"></i> Buka Folder
+                                                            </a>
+                                                            @else
+                                                            <button type="button" class="btn btn-primary"
+                                                                    onclick="createDriveFolder({{ $dok->id }}, {{ $perceraian->id }})"
+                                                                    id="btnDrive_{{ $dok->id }}">
+                                                                <i class="bx bx-folder-open"></i> Buat Folder
+                                                            </button>
+                                                            @endif
+                                                        </div>
+                                                        <div id="driveStatus_{{ $dok->id }}" class="mt-1"></div>
+                                                        @if ($dok->link)
+                                                        <small class="text-success">✅ Folder sudah dibuat</small>
+                                                        @else
+                                                        <small class="text-muted">Klik "Buat Folder" untuk membuat folder Google Drive secara otomatis</small>
+                                                        @endif
+                                                    </div>
                                                     <div class="mb-3">
-                                                        <label for="link_{{ $dok->id }}" class="form-label">Link Google Drive</label>
-                                                        <input type="url" class="form-control" id="link_{{ $dok->id }}"
-                                                               name="link" value="{{ $dok->link }}"
-                                                               placeholder="https://drive.google.com/...">
+                                                        <label for="keterangan_{{ $dok->id }}" class="form-label">Keterangan</label>
+                                                        <textarea class="form-control" id="keterangan_{{ $dok->id }}"
+                                                                  name="keterangan" rows="2">{{ $dok->keterangan }}</textarea>
                                                     </div>
                                                     @else
                                                     <div class="mb-3">
@@ -154,3 +222,47 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function createDriveFolder(dokumenId, perceraianId) {
+    const btn = document.getElementById('btnDrive_' + dokumenId);
+    const statusDiv = document.getElementById('driveStatus_' + dokumenId);
+    const linkInput = document.getElementById('link_' + dokumenId);
+
+    // Disable button & show loading
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Membuat...';
+    statusDiv.innerHTML = '<small class="text-info">⏳ Membuat folder Google Drive...</small>';
+
+    const url = `/perceraian/${perceraianId}/dokumen/${dokumenId}/create-drive-folder`;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        },
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            linkInput.value = data.link;
+            statusDiv.innerHTML = '<small class="text-success">✅ ' + data.message + '</small>';
+
+            // Refresh halaman setelah 1.5 detik agar data terbaru tampil
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            statusDiv.innerHTML = '<small class="text-danger">❌ ' + data.message + '</small>';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-folder-open"></i> Buat Folder';
+        }
+    })
+    .catch(err => {
+        statusDiv.innerHTML = '<small class="text-danger">❌ Terjadi kesalahan: ' + err.message + '</small>';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bx bx-folder-open"></i> Buat Folder';
+    });
+}
+</script>
+@endpush

@@ -41,11 +41,19 @@ class PerceraianController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'pegawai_id' => ['required', 'exists:pegawai,id'],
             'nama_pasangan' => ['nullable', 'string', 'max:255'],
             'sebagai' => ['required', 'in:penggugat,tergugat'],
-        ]);
+        ];
+
+        // Hanya admin yang bisa mengisi tanggal & berita acara pemanggilan
+        if (Auth::user()->hasRole('admin')) {
+            $rules['tanggal_pemanggilan'] = ['nullable', 'date'];
+            $rules['berita_acara_pemanggilan'] = ['nullable', 'string'];
+        }
+
+        $validated = $request->validate($rules);
 
         $validated['created_by'] = Auth::id();
         $validated['status'] = 'draft';
@@ -91,13 +99,21 @@ class PerceraianController extends Controller
     {
         $this->authorizeAccess($perceraian);
 
-        $validated = $request->validate([
+        $rules = [
             'pegawai_id' => ['required', 'exists:pegawai,id'],
             'nama_pasangan' => ['nullable', 'string', 'max:255'],
             'sebagai' => ['required', 'in:penggugat,tergugat'],
             'status' => ['required', 'in:draft,pengajuan,diproses,selesai,ditolak'],
             'catatan' => ['nullable', 'string'],
-        ]);
+        ];
+
+        // Hanya admin yang bisa mengisi tanggal & berita acara pemanggilan
+        if (Auth::user()->hasRole('admin')) {
+            $rules['tanggal_pemanggilan'] = ['nullable', 'date'];
+            $rules['berita_acara_pemanggilan'] = ['nullable', 'string'];
+        }
+
+        $validated = $request->validate($rules);
 
         $perceraian->update($validated);
         return redirect()->route('perceraian.index')->with('success', 'Data berhasil diperbarui.');
@@ -129,8 +145,12 @@ class PerceraianController extends Controller
             'keterangan' => ['nullable', 'string', 'max:500'],
         ]);
 
-        // Upload file PDF (kecuali dokumentasi — pakai link)
-        if ($dokumen->kode !== 'dokumentasi' && $request->hasFile('file')) {
+        // Dokumentasi & Bukti lain pakai link Google Drive folder
+        if (in_array($dokumen->kode, ['dokumentasi', 'bukti_lain'])) {
+            $data['file'] = null; // hapus file jika sebelumnya ada
+        }
+        // Upload file PDF (selain dokumentasi & bukti_lain)
+        elseif ($request->hasFile('file')) {
             $request->validate(['file' => ['file', 'mimes:pdf', 'max:10240']]);
             $path = $request->file('file')->store('dokumen_perceraian', 'public');
             $data['file'] = $path;
@@ -140,13 +160,67 @@ class PerceraianController extends Controller
         $dokumen->update($data);
         $dokumen->refresh();
 
-        if ($dokumen->kode === 'dokumentasi') {
+        if (in_array($dokumen->kode, ['dokumentasi', 'bukti_lain'])) {
             $dokumen->update(['status' => !empty($dokumen->link)]);
         } else {
             $dokumen->update(['status' => !empty($dokumen->file)]);
         }
 
         return back()->with('success', 'Dokumen berhasil diperbarui.');
+    }
+
+    // Buat folder Google Drive otomatis
+    public function createDriveFolder(Request $request, IzinPerceraian $perceraian, DokumenPerceraian $dokumen)
+    {
+        if ($dokumen->izin_perceraian_id !== $perceraian->id) {
+            abort(404);
+        }
+
+        if (!in_array($dokumen->kode, ['dokumentasi', 'bukti_lain'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tipe dokumen ini tidak menggunakan Google Drive folder.',
+            ], 400);
+        }
+
+        try {
+            $service = new \App\Services\GoogleDriveService();
+
+            $result = $service->createDokumenFolder(
+                namaPegawai: $perceraian->pegawai->nama ?? 'Unknown',
+                nip: $perceraian->pegawai->nip ?? '000000',
+                izinId: $perceraian->id,
+                kodeDokumen: $dokumen->kode,
+                namaDokumen: $dokumen->nama_dokumen
+            );
+
+            if ($result['success']) {
+                // Simpan link ke database
+                $dokumen->update([
+                    'link' => $result['link'],
+                    'status' => true,
+                ]);
+
+                session()->flash('success', 'Folder Google Drive berhasil dibuat!');
+
+                return response()->json([
+                    'success' => true,
+                    'link' => $result['link'],
+                    'message' => 'Folder Google Drive berhasil dibuat!',
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     // Ajukan izin (ubah status draft -> pengajuan)

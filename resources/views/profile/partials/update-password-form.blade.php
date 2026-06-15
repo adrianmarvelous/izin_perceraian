@@ -8,13 +8,6 @@
             @csrf
             @method('put')
 
-            @if (session('status') === 'password-updated')
-                <div class="alert alert-success alert-dismissible" role="alert">
-                    {{ __('Saved.') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="update_password_current_password" class="form-label">{{ __('Current Password') }} <span class="text-danger">*</span></label>
