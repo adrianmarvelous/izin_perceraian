@@ -23,11 +23,17 @@ class Pegawai extends Model
         'kode_unit',
         'unit_kerja',
         'opd',
+        'id_gol',
         'status_menikah',
         'nama_pasangan',
         'tgl_menikah',
         'pekerjaan',
     ];
+
+    public function golongan()
+    {
+        return $this->belongsTo(Golongan::class, 'id_gol');
+    }
 
     protected function casts(): array
     {

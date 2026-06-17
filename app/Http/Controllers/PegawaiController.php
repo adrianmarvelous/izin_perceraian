@@ -24,13 +24,13 @@ class PegawaiController extends Controller
 
         // Admin bisa lihat semua, OPD hanya lihat pegawai sesuai OPD-nya
         if ($user?->hasRole('admin')) {
-            $query = Pegawai::query();
+            $query = Pegawai::with('golongan')->query();
             if ($request->filled('opd')) {
                 $query->where('opd', $request->opd);
             }
             $pegawai = $query->latest()->get();
         } else {
-            $pegawai = Pegawai::where('opd', $user->name)->latest()->get();
+            $pegawai = Pegawai::with('golongan')->where('opd', $user->name)->latest()->get();
         }
 
         return view('pegawai.index', compact('pegawai', 'opdList'));

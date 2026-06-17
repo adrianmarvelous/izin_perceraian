@@ -36,5 +36,9 @@ class DatabaseSeeder extends Seeder
         $this->call(PegawaiSeeder::class);
 
         $this->call(MasterOpdSeeder::class);
+
+        $this->call(GolonganSeeder::class);
+
+        $this->call(UpdateGolonganPegawaiSeeder::class);
     }
 }
