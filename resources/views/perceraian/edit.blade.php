@@ -10,7 +10,7 @@
                 <h5 class="mb-0">Edit Pengajuan: {{ $perceraian->pegawai->nama ?? '-' }}</h5>
             </div>
             <div class="card-body">
-                <form action="{{ route('perceraian.update', $perceraian) }}" method="POST">
+                <form action="{{ route('perceraian.update', $perceraian) }}" method="POST" enctype="multipart/form-data">
                     @csrf @method('PUT')
 
                     <div class="mb-3">
@@ -73,6 +73,35 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">MS / TMS</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="ms_tms" id="ms_tms_1"
+                                       value="1" {{ old('ms_tms', $perceraian->ms_tms) === 1 ? 'checked' : '' }}>
+                                <label class="form-check-label" for="ms_tms_1">
+                                    <span class="badge bg-label-success">MS (Memenuhi Syarat)</span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="ms_tms" id="ms_tms_-1"
+                                       value="-1" {{ old('ms_tms', $perceraian->ms_tms) === -1 ? 'checked' : '' }}>
+                                <label class="form-check-label" for="ms_tms_-1">
+                                    <span class="badge bg-label-danger">TMS (Tidak Memenuhi Syarat)</span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="ms_tms" id="ms_tms_0"
+                                       value="0" {{ old('ms_tms', $perceraian->ms_tms) === 0 || is_null($perceraian->ms_tms) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="ms_tms_0">
+                                    <span class="badge bg-label-secondary">Belum ditentukan</span>
+                                </label>
+                            </div>
+                        </div>
+                        @error('ms_tms')<div class="text-danger small">{{ $message }}</div>@enderror
+                    </div>
+
+                    @if ($perceraian->ms_tms === 1 || old('ms_tms') === '1')
+                    <div class="mb-3">
                         <label for="tanggal_pemanggilan" class="form-label">Tanggal Pemanggilan</label>
                         <input type="date" class="form-control @error('tanggal_pemanggilan') is-invalid @enderror"
                                id="tanggal_pemanggilan" name="tanggal_pemanggilan"
@@ -81,14 +110,39 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="berita_acara_pemanggilan" class="form-label">Berita Acara Pemanggilan</label>
-                        <textarea class="form-control @error('berita_acara_pemanggilan') is-invalid @enderror"
-                                  id="berita_acara_pemanggilan" name="berita_acara_pemanggilan" rows="3">{{ old('berita_acara_pemanggilan', $perceraian->berita_acara_pemanggilan) }}</textarea>
-                        @error('berita_acara_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <label for="berita_acara_pemanggilan_file" class="form-label">Upload Berita Acara Pemanggilan (PDF)</label>
+                        <input type="file" class="form-control @error('berita_acara_pemanggilan_file') is-invalid @enderror"
+                               id="berita_acara_pemanggilan_file" name="berita_acara_pemanggilan_file" accept=".pdf">
+                        @error('berita_acara_pemanggilan_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        @if ($perceraian->berita_acara_pemanggilan_file)
+                            <div class="mt-1">
+                                <small class="text-success">
+                                    <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank">
+                                        <i class="bx bx-file"></i> Lihat file saat ini
+                                    </a>
+                                </small>
+                            </div>
+                        @endif
+                        <small class="text-muted">Format: PDF, maks 10MB</small>
                     </div>
+                    @endif
                     @endcan
 
                     @cannot('admin')
+                    <div class="mb-3">
+                        <label class="form-label">MS / TMS</label>
+                        <div>
+                            @if ($perceraian->ms_tms === 1)
+                                <span class="badge bg-label-success">MS (Memenuhi Syarat)</span>
+                            @elseif ($perceraian->ms_tms === -1)
+                                <span class="badge bg-label-danger">TMS (Tidak Memenuhi Syarat)</span>
+                            @else
+                                <span class="badge bg-label-secondary">Belum ditentukan</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if ($perceraian->ms_tms === 1)
                     <div class="mb-3">
                         <label class="form-label">Tanggal Pemanggilan</label>
                         <input type="text" class="form-control" value="{{ $perceraian->tanggal_pemanggilan?->format('d M Y') ?? '-' }}" readonly>
@@ -96,8 +150,18 @@
 
                     <div class="mb-3">
                         <label class="form-label">Berita Acara Pemanggilan</label>
-                        <textarea class="form-control" rows="3" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
+                        @if ($perceraian->berita_acara_pemanggilan_file)
+                            <div>
+                                <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                    <i class="bx bx-file"></i> Lihat PDF
+                                </a>
+                            </div>
+                        @else
+                            <textarea class="form-control" rows="3" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
+                        @endif
                     </div>
+
+                    @endif
                     @endcannot
 
                     <div class="mt-4">

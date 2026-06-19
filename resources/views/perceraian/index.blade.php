@@ -27,6 +27,7 @@
                                 <th>Pasangan</th>
                                 <th>Sebagai</th>
                                 <th>Status</th>
+                                <th>MS/TMS</th>
                                 <th>Dibuat</th>
                                 <th>Aksi</th>
                             </tr>
@@ -48,6 +49,7 @@
                                             $badge = match($d->status) {
                                                 'draft' => 'bg-label-secondary',
                                                 'pengajuan' => 'bg-label-warning',
+                                                'pemanggilan' => 'bg-label-info',
                                                 'diproses' => 'bg-label-primary',
                                                 'selesai' => 'bg-label-success',
                                                 'ditolak' => 'bg-label-danger',
@@ -55,6 +57,15 @@
                                             };
                                         @endphp
                                         <span class="badge {{ $badge }}">{{ ucfirst($d->status) }}</span>
+                                    </td>
+                                    <td>
+                                        @if ($d->ms_tms === 1)
+                                            <span class="badge bg-label-success">MS</span>
+                                        @elseif ($d->ms_tms === -1)
+                                            <span class="badge bg-label-danger">TMS</span>
+                                        @else
+                                            <span class="badge bg-label-secondary">-</span>
+                                        @endif
                                     </td>
                                     <td>{{ $d->created_at->format('d M Y') }}</td>
                                     <td>

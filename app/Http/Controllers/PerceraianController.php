@@ -47,13 +47,20 @@ class PerceraianController extends Controller
             'sebagai' => ['required', 'in:penggugat,tergugat'],
         ];
 
-        // Hanya admin yang bisa mengisi tanggal & berita acara pemanggilan
+        // Hanya admin yang bisa mengisi tanggal & upload berita acara pemanggilan
         if (Auth::user()->hasRole('admin')) {
             $rules['tanggal_pemanggilan'] = ['nullable', 'date'];
-            $rules['berita_acara_pemanggilan'] = ['nullable', 'string'];
+            $rules['berita_acara_pemanggilan_file'] = ['nullable', 'file', 'mimes:pdf', 'max:10240'];
+            $rules['ms_tms'] = ['nullable', 'in:-1,0,1'];
         }
 
         $validated = $request->validate($rules);
+
+        // Upload file berita acara pemanggilan
+        if (Auth::user()->hasRole('admin') && $request->hasFile('berita_acara_pemanggilan_file')) {
+            $path = $request->file('berita_acara_pemanggilan_file')->store('berita_acara_pemanggilan', 'public');
+            $validated['berita_acara_pemanggilan_file'] = $path;
+        }
 
         $validated['created_by'] = Auth::id();
         $validated['status'] = 'draft';
@@ -103,17 +110,29 @@ class PerceraianController extends Controller
             'pegawai_id' => ['required', 'exists:pegawai,id'],
             'nama_pasangan' => ['nullable', 'string', 'max:255'],
             'sebagai' => ['required', 'in:penggugat,tergugat'],
-            'status' => ['required', 'in:draft,pengajuan,diproses,selesai,ditolak'],
+            'status' => ['nullable', 'in:draft,pengajuan,diproses,selesai,ditolak,pemanggilan'],
             'catatan' => ['nullable', 'string'],
         ];
 
-        // Hanya admin yang bisa mengisi tanggal & berita acara pemanggilan
+        // Hanya admin yang bisa mengisi tanggal & upload berita acara pemanggilan
         if (Auth::user()->hasRole('admin')) {
             $rules['tanggal_pemanggilan'] = ['nullable', 'date'];
-            $rules['berita_acara_pemanggilan'] = ['nullable', 'string'];
+            $rules['berita_acara_pemanggilan_file'] = ['nullable', 'file', 'mimes:pdf', 'max:10240'];
+            $rules['ms_tms'] = ['nullable', 'in:-1,0,1'];
         }
 
         $validated = $request->validate($rules);
+
+        // Upload file berita acara pemanggilan
+        if (Auth::user()->hasRole('admin') && $request->hasFile('berita_acara_pemanggilan_file')) {
+            $path = $request->file('berita_acara_pemanggilan_file')->store('berita_acara_pemanggilan', 'public');
+            $validated['berita_acara_pemanggilan_file'] = $path;
+        }
+
+        // Jika tanggal pemanggilan diisi, otomatis update status ke 'pemanggilan'
+        if (Auth::user()->hasRole('admin') && $request->filled('tanggal_pemanggilan')) {
+            $validated['status'] = 'pemanggilan';
+        }
 
         $perceraian->update($validated);
         return redirect()->route('perceraian.index')->with('success', 'Data berhasil diperbarui.');
@@ -221,6 +240,29 @@ class PerceraianController extends Controller
                 'message' => 'Error: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    // Update MS/TMS (hanya admin)
+    public function updateMsTms(Request $request, IzinPerceraian $perceraian, int $value)
+    {
+        if (!Auth::user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        if (!in_array($value, [-1, 1])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nilai tidak valid. Gunakan -1 (TMS) atau 1 (MS).',
+            ], 400);
+        }
+
+        $perceraian->update(['ms_tms' => $value]);
+
+        return response()->json([
+            'success' => true,
+            'ms_tms' => $value,
+            'message' => $value === 1 ? 'Status MS berhasil disimpan.' : 'Status TMS berhasil disimpan.',
+        ]);
     }
 
     // Ajukan izin (ubah status draft -> pengajuan)

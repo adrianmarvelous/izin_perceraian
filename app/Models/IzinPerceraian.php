@@ -14,8 +14,10 @@ class IzinPerceraian extends Model
         'sebagai',
         'status',
         'catatan',
+        'ms_tms',
         'tanggal_pemanggilan',
         'berita_acara_pemanggilan',
+        'berita_acara_pemanggilan_file',
         'created_by',
     ];
 
@@ -25,6 +27,7 @@ class IzinPerceraian extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'tanggal_pemanggilan' => 'date',
+            'ms_tms' => 'integer',
         ];
     }
 

@@ -16,20 +16,32 @@
                     Pegawai: <strong>{{ $perceraian->pegawai->nama ?? '-' }}</strong> ({{ $perceraian->pegawai->nip ?? '-' }})<br>
                     Pasangan: {{ $perceraian->nama_pasangan ?? $perceraian->pegawai->nama_pasangan ?? '-' }}<br>
                     Sebagai: <strong>{{ ucfirst($perceraian->sebagai) }}</strong> |
-                    Status: <span class="badge bg-label-warning">{{ ucfirst($perceraian->status) }}</span>
+                    Status: 
+                    @php
+                        $statusBadge = match($perceraian->status) {
+                            'draft' => 'bg-label-secondary',
+                            'pengajuan' => 'bg-label-warning',
+                            'pemanggilan' => 'bg-label-info',
+                            'diproses' => 'bg-label-primary',
+                            'selesai' => 'bg-label-success',
+                            'ditolak' => 'bg-label-danger',
+                            default => 'bg-label-secondary',
+                        };
+                    @endphp
+                    <span class="badge {{ $statusBadge }}">{{ ucfirst($perceraian->status) }}</span>
                 </div>
 
                 {{-- Tanggal Pemanggilan & Berita Acara --}}
                 @can('admin')
-                <form action="{{ route('perceraian.update', $perceraian) }}" method="POST" class="mb-4 p-3 border rounded">
+                <form action="{{ route('perceraian.update', $perceraian) }}" method="POST" class="mb-4 p-3 border rounded" enctype="multipart/form-data">
                     @csrf @method('PUT')
                     <input type="hidden" name="pegawai_id" value="{{ $perceraian->pegawai_id }}">
                     <input type="hidden" name="nama_pasangan" value="{{ $perceraian->nama_pasangan }}">
                     <input type="hidden" name="sebagai" value="{{ $perceraian->sebagai }}">
-                    <input type="hidden" name="status" value="{{ $perceraian->status }}">
                     <input type="hidden" name="catatan" value="{{ $perceraian->catatan }}">
+                    @if ($perceraian->ms_tms === 1)
                     <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
-                    <div class="row">
+                    <div class="row mt-2">
                         <div class="col-md-4 mb-2">
                             <label for="tanggal_pemanggilan" class="form-label">Tanggal Pemanggilan</label>
                             <input type="date" class="form-control form-control-sm @error('tanggal_pemanggilan') is-invalid @enderror"
@@ -38,20 +50,48 @@
                             @error('tanggal_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-8 mb-2">
-                            <label for="berita_acara_pemanggilan" class="form-label">Berita Acara Pemanggilan</label>
-                            <textarea class="form-control form-control-sm @error('berita_acara_pemanggilan') is-invalid @enderror"
-                                      id="berita_acara_pemanggilan" name="berita_acara_pemanggilan" rows="2">{{ old('berita_acara_pemanggilan', $perceraian->berita_acara_pemanggilan) }}</textarea>
-                            @error('berita_acara_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <label for="berita_acara_pemanggilan_file" class="form-label">Upload Berita Acara Pemanggilan (PDF)</label>
+                            <input type="file" class="form-control form-control-sm @error('berita_acara_pemanggilan_file') is-invalid @enderror"
+                                   id="berita_acara_pemanggilan_file" name="berita_acara_pemanggilan_file" accept=".pdf">
+                            @error('berita_acara_pemanggilan_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            @if ($perceraian->berita_acara_pemanggilan_file)
+                                <div class="mt-1">
+                                    <small class="text-success">
+                                        <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank">
+                                            <i class="bx bx-file"></i> Lihat file saat ini
+                                        </a>
+                                    </small>
+                                </div>
+                            @endif
+                            <small class="text-muted">Format: PDF, maks 10MB</small>
                         </div>
                     </div>
+
                     <button type="submit" class="btn btn-sm btn-primary mt-1">
                         <i class="bx bx-save"></i> Simpan Data Pemanggilan
                     </button>
+                    @endif
                 </form>
                 @else
                 <div class="mb-4 p-3 border rounded">
-                    <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
                     <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">MS / TMS</label>
+                            <div>
+                                @if ($perceraian->ms_tms === 1)
+                                    <span class="badge bg-label-success">MS</span>
+                                @elseif ($perceraian->ms_tms === -1)
+                                    <span class="badge bg-label-danger">TMS</span>
+                                @else
+                                    <span class="badge bg-label-secondary">-</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    @if ($perceraian->ms_tms === 1)
+                    <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
+                    <div class="row mt-2">
                         <div class="col-md-4 mb-2">
                             <label class="form-label">Tanggal Pemanggilan</label>
                             <input type="text" class="form-control form-control-sm"
@@ -59,9 +99,18 @@
                         </div>
                         <div class="col-md-8 mb-2">
                             <label class="form-label">Berita Acara Pemanggilan</label>
-                            <textarea class="form-control form-control-sm" rows="2" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
+                            @if ($perceraian->berita_acara_pemanggilan_file)
+                                <div>
+                                    <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                        <i class="bx bx-file"></i> Lihat PDF
+                                    </a>
+                                </div>
+                            @else
+                                <textarea class="form-control form-control-sm" rows="2" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
+                            @endif
                         </div>
                     </div>
+                    @endif
                 </div>
                 @endcan
 
@@ -204,10 +253,23 @@
                     </table>
                 </div>
 
-                <div class="mt-4 d-flex gap-2">
+                <div class="mt-4 d-flex gap-2 align-items-center">
                     <a href="{{ route('perceraian.index') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back"></i> Kembali
                     </a>
+                    @can('admin')
+                    <div class="d-flex gap-1 ms-auto" id="msTmsButtons">
+                        <button type="button" class="btn btn-sm {{ $perceraian->ms_tms === 1 ? 'btn-success' : 'btn-outline-success' }}"
+                                onclick="updateMsTms({{ $perceraian->id }}, 1)" id="btnMs_{{ $perceraian->id }}">
+                            <i class="bx bx-check-circle"></i> MS
+                        </button>
+                        <button type="button" class="btn btn-sm {{ $perceraian->ms_tms === -1 ? 'btn-danger' : 'btn-outline-danger' }}"
+                                onclick="updateMsTms({{ $perceraian->id }}, -1)" id="btnTms_{{ $perceraian->id }}">
+                            <i class="bx bx-x-circle"></i> TMS
+                        </button>
+                        <span id="msTmsStatus_{{ $perceraian->id }}"></span>
+                    </div>
+                    @endcan
                     @if ($perceraian->status == 'draft')
                     <form action="{{ route('perceraian.ajukan', $perceraian) }}" method="POST">
                         @csrf
@@ -262,6 +324,82 @@ function createDriveFolder(dokumenId, perceraianId) {
         statusDiv.innerHTML = '<small class="text-danger">❌ Terjadi kesalahan: ' + err.message + '</small>';
         btn.disabled = false;
         btn.innerHTML = '<i class="bx bx-folder-open"></i> Buat Folder';
+    });
+}
+
+function updateMsTms(perceraianId, value) {
+    const label = value === 1 ? 'MS (Memenuhi Syarat)' : 'TMS (Tidak Memenuhi Syarat)';
+    const icon = value === 1 ? 'question' : 'warning';
+
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Yakin ingin menetapkan status ' + label + '?',
+        icon: icon,
+        showCancelButton: true,
+        confirmButtonColor: value === 1 ? '#28a745' : '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, ' + (value === 1 ? 'MS' : 'TMS'),
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        const btnMs = document.getElementById('btnMs_' + perceraianId);
+        const btnTms = document.getElementById('btnTms_' + perceraianId);
+        const statusSpan = document.getElementById('msTmsStatus_' + perceraianId);
+
+        btnMs.disabled = true;
+        btnTms.disabled = true;
+        statusSpan.innerHTML = '<small class="text-info">⏳ Menyimpan...</small>';
+
+        const url = `/perceraian/${perceraianId}/ms-tms/${value}`;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false,
+                }).then(() => {
+                    if (value === -1) {
+                        // TMS → kembali ke halaman sebelumnya
+                        window.location.href = '{{ route("perceraian.index") }}';
+                    } else {
+                        // MS → refresh halaman ini
+                        location.reload();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: data.message,
+                });
+                btnMs.disabled = false;
+                btnTms.disabled = false;
+                statusSpan.innerHTML = '';
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Terjadi kesalahan: ' + err.message,
+            });
+            btnMs.disabled = false;
+            btnTms.disabled = false;
+            statusSpan.innerHTML = '';
+        });
     });
 }
 </script>

@@ -149,16 +149,6 @@
                                                             <div class="col-sm-8">{{ $p->status_peg ?? '-' }}</div>
                                                         </div>
                                                         <div class="row mb-3">
-                                                            <div class="col-sm-4 fw-medium text-muted">Golongan</div>
-                                                            <div class="col-sm-8">
-                                                                @if ($p->golongan)
-                                                                    {{ $p->golongan->gol_ruang }} - {{ $p->golongan->pangkat }}
-                                                                @else
-                                                                    -
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="row mb-3">
                                                             <div class="col-sm-4 fw-medium text-muted">Gelar Depan</div>
                                                             <div class="col-sm-8">{{ $p->gelar_depan ?? '-' }}</div>
                                                         </div>
