@@ -18,17 +18,16 @@
                     Sebagai: <strong>{{ ucfirst($perceraian->sebagai) }}</strong> |
                     Status: 
                     @php
-                        $statusBadge = match($perceraian->status) {
-                            'draft' => 'bg-label-secondary',
-                            'pengajuan' => 'bg-label-warning',
-                            'pemanggilan' => 'bg-label-info',
-                            'diproses' => 'bg-label-primary',
-                            'selesai' => 'bg-label-success',
-                            'ditolak' => 'bg-label-danger',
-                            default => 'bg-label-secondary',
-                        };
+                        $colors = [
+                            1 => 'bg-label-secondary',
+                            2 => 'bg-label-warning',
+                            3 => 'bg-label-info',
+                            4 => 'bg-label-primary',
+                            5 => 'bg-label-success',
+                        ];
+                        $statusBadge = $colors[$perceraian->status_izin_perceraian_id] ?? 'bg-label-secondary';
                     @endphp
-                    <span class="badge {{ $statusBadge }}">{{ ucfirst($perceraian->status) }}</span>
+                    <span class="badge {{ $statusBadge }}">{{ $perceraian->statusIzin?->nama ?? 'Draft' }}</span>
                 </div>
 
                 {{-- Tanggal Pemanggilan & Berita Acara --}}
@@ -270,10 +269,10 @@
                         <span id="msTmsStatus_{{ $perceraian->id }}"></span>
                     </div>
                     @endcan
-                    @if ($perceraian->status == 'draft')
-                    <form action="{{ route('perceraian.ajukan', $perceraian) }}" method="POST">
+                    @if ($perceraian->status_izin_perceraian_id == 1 || is_null($perceraian->status_izin_perceraian_id))
+                    <form id="formAjukan" action="{{ route('perceraian.ajukan', $perceraian) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success">
+                        <button type="button" class="btn btn-success" onclick="cekDokumenWajib()">
                             <i class="bx bx-send"></i> Ajukan Izin
                         </button>
                     </form>
@@ -283,9 +282,49 @@
         </div>
     </div>
 </div>
+
+{{-- Modal Dokumen Belum Lengkap --}}
+<div class="modal fade" id="modalDokumenBelum" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title"><i class="bx bx-error-circle"></i> Dokumen Belum Lengkap</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Harap lengkapi dokumen wajib berikut sebelum mengajukan izin:</p>
+                <ul id="listDokumenKurang" class="list-group list-group-flush"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
+<script>
+function cekDokumenWajib() {
+    const dokumen = @json($perceraian->dokumen);
+    const kurang = dokumen.filter(d => d.wajib && !d.status && d.kondisi_wajib !== 'pisah_rumah>=2_tahun');
+
+    if (kurang.length > 0) {
+        const list = document.getElementById('listDokumenKurang');
+        list.innerHTML = '';
+        kurang.forEach(d => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex align-items-center';
+            li.innerHTML = `<i class="bx bx-x-circle text-danger me-2"></i> ${d.nama_dokumen}`;
+            list.appendChild(li);
+        });
+        const modal = new bootstrap.Modal(document.getElementById('modalDokumenBelum'));
+        modal.show();
+    } else {
+        document.getElementById('formAjukan').submit();
+    }
+}
+</script>
 <script>
 function createDriveFolder(dokumenId, perceraianId) {
     const btn = document.getElementById('btnDrive_' + dokumenId);

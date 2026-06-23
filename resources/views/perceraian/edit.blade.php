@@ -55,15 +55,15 @@
 
                     @can('admin')
                     <div class="mb-3">
-                        <label for="status" class="form-label">Status</label>
-                        <select class="form-select @error('status') is-invalid @enderror" id="status" name="status">
-                            <option value="draft" {{ $perceraian->status == 'draft' ? 'selected' : '' }}>Draft</option>
-                            <option value="pengajuan" {{ $perceraian->status == 'pengajuan' ? 'selected' : '' }}>Pengajuan</option>
-                            <option value="diproses" {{ $perceraian->status == 'diproses' ? 'selected' : '' }}>Diproses</option>
-                            <option value="selesai" {{ $perceraian->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                            <option value="ditolak" {{ $perceraian->status == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        <label for="status_izin_perceraian_id" class="form-label">Status</label>
+                        <select class="form-select @error('status_izin_perceraian_id') is-invalid @enderror" id="status_izin_perceraian_id" name="status_izin_perceraian_id">
+                            @foreach (\App\Models\StatusIzinPerceraian::all() as $s)
+                                <option value="{{ $s->id }}" {{ old('status_izin_perceraian_id', $perceraian->status_izin_perceraian_id) == $s->id ? 'selected' : '' }}>
+                                    {{ $s->nama }}
+                                </option>
+                            @endforeach
                         </select>
-                        @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        @error('status_izin_perceraian_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="mb-3">

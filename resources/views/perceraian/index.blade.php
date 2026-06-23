@@ -46,17 +46,16 @@
                                     </td>
                                     <td>
                                         @php
-                                            $badge = match($d->status) {
-                                                'draft' => 'bg-label-secondary',
-                                                'pengajuan' => 'bg-label-warning',
-                                                'pemanggilan' => 'bg-label-info',
-                                                'diproses' => 'bg-label-primary',
-                                                'selesai' => 'bg-label-success',
-                                                'ditolak' => 'bg-label-danger',
-                                                default => 'bg-label-secondary',
-                                            };
+                                            $colors = [
+                                                1 => 'bg-label-secondary',
+                                                2 => 'bg-label-warning',
+                                                3 => 'bg-label-info',
+                                                4 => 'bg-label-primary',
+                                                5 => 'bg-label-success',
+                                            ];
+                                            $badge = $colors[$d->status_izin_perceraian_id] ?? 'bg-label-secondary';
                                         @endphp
-                                        <span class="badge {{ $badge }}">{{ ucfirst($d->status) }}</span>
+                                        <span class="badge {{ $badge }}">{{ $d->statusIzin?->nama ?? 'Draft' }}</span>
                                     </td>
                                     <td>
                                         @if ($d->ms_tms === 1)
@@ -83,7 +82,7 @@
                                                 <a href="{{ route('perceraian.edit', $d) }}" class="dropdown-item">
                                                     <i class="bx bx-edit-alt me-1"></i> Edit
                                                 </a>
-                                                @if ($d->status == 'draft' && !Auth::user()->hasRole('admin'))
+                                                @if (($d->status_izin_perceraian_id == 1 || is_null($d->status_izin_perceraian_id)) && !Auth::user()->hasRole('admin'))
                                                 <form action="{{ route('perceraian.ajukan', $d) }}" method="POST">
                                                     @csrf
                                                     <button type="submit" class="dropdown-item">

@@ -15,11 +15,13 @@ class PerceraianController extends Controller
         $user = Auth::user();
 
         if ($user->hasRole('admin')) {
-            $data = IzinPerceraian::with('pegawai', 'creator')->latest()->get();
+            $data = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
+                ->where('status_izin_perceraian_id', 2)
+                ->latest()->get();
         } else {
             // OPD hanya lihat pengajuan dari pegawai di OPD-nya
             $pegawaiIds = Pegawai::where('opd', $user->name)->pluck('id');
-            $data = IzinPerceraian::with('pegawai', 'creator')
+            $data = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
                 ->whereIn('pegawai_id', $pegawaiIds)
                 ->orWhere('created_by', $user->id)
                 ->latest()->get();
@@ -63,7 +65,7 @@ class PerceraianController extends Controller
         }
 
         $validated['created_by'] = Auth::id();
-        $validated['status'] = 'draft';
+        $validated['status_izin_perceraian_id'] = 1;
 
         $izin = IzinPerceraian::create($validated);
 
@@ -110,7 +112,7 @@ class PerceraianController extends Controller
             'pegawai_id' => ['required', 'exists:pegawai,id'],
             'nama_pasangan' => ['nullable', 'string', 'max:255'],
             'sebagai' => ['required', 'in:penggugat,tergugat'],
-            'status' => ['nullable', 'in:draft,pengajuan,diproses,selesai,ditolak,pemanggilan'],
+            'status_izin_perceraian_id' => ['nullable', 'integer', 'exists:status_izin_perceraian,id'],
             'catatan' => ['nullable', 'string'],
         ];
 
@@ -129,11 +131,6 @@ class PerceraianController extends Controller
             $validated['berita_acara_pemanggilan_file'] = $path;
         }
 
-        // Jika tanggal pemanggilan diisi, otomatis update status ke 'pemanggilan'
-        if (Auth::user()->hasRole('admin') && $request->filled('tanggal_pemanggilan')) {
-            $validated['status'] = 'pemanggilan';
-        }
-
         $perceraian->update($validated);
         return redirect()->route('perceraian.index')->with('success', 'Data berhasil diperbarui.');
     }
@@ -148,7 +145,7 @@ class PerceraianController extends Controller
     // Halaman kelola dokumen pendukung
     public function dokumen(IzinPerceraian $perceraian)
     {
-        $perceraian->load('pegawai', 'dokumen');
+        $perceraian->load('pegawai', 'dokumen', 'statusIzin');
         return view('perceraian.dokumen', compact('perceraian'));
     }
 
@@ -268,7 +265,7 @@ class PerceraianController extends Controller
     // Ajukan izin (ubah status draft -> pengajuan)
     public function ajukan(IzinPerceraian $perceraian)
     {
-        $perceraian->update(['status' => 'pengajuan']);
+        $perceraian->update(['status_izin_perceraian_id' => 2]);
         return redirect()->route('perceraian.index')->with('success', 'Izin perceraian berhasil diajukan.');
     }
 
@@ -276,7 +273,7 @@ class PerceraianController extends Controller
     public function printPdf(IzinPerceraian $perceraian)
     {
         $this->authorizeAccess($perceraian);
-        $perceraian->load('pegawai', 'dokumen', 'creator');
+        $perceraian->load('pegawai', 'dokumen', 'creator', 'statusIzin');
         return view('perceraian.print', compact('perceraian'));
     }
 

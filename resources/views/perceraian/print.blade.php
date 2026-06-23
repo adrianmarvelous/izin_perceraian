@@ -202,7 +202,7 @@
         <tr>
             <td class="label">Status Pengajuan</td>
             <td class="separator">:</td>
-            <td><span class="status-badge">{{ strtoupper($perceraian->status) }}</span></td>
+            <td><span class="status-badge">{{ strtoupper($perceraian->statusIzin?->nama ?? 'Draft') }}</span></td>
         </tr>
         <tr>
             <td class="label">Tanggal Pengajuan</td>

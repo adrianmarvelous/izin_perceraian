@@ -39,6 +39,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(GolonganSeeder::class);
 
+        $this->call(StatusIzinPerceraianSeeder::class);
+
         $this->call(UpdateGolonganPegawaiSeeder::class);
     }
 }

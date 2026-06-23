@@ -10,6 +10,7 @@ class IzinPerceraian extends Model
 
     protected $fillable = [
         'pegawai_id',
+        'status_izin_perceraian_id',
         'nama_pasangan',
         'sebagai',
         'status',
@@ -34,6 +35,11 @@ class IzinPerceraian extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class);
+    }
+
+    public function statusIzin()
+    {
+        return $this->belongsTo(StatusIzinPerceraian::class, 'status_izin_perceraian_id');
     }
 
     public function dokumen()

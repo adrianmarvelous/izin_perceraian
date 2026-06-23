@@ -109,6 +109,12 @@
                         <a href="{{ route('perceraian.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-heart"></i>
                             <div data-i18n="Izin Perceraian">Izin Perceraian</div>
+                            @can('admin')
+                                @php $pendingCount = \App\Models\IzinPerceraian::where('status_izin_perceraian_id', 2)->count(); @endphp
+                                @if ($pendingCount > 0)
+                                    <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingCount }}</span>
+                                @endif
+                            @endcan
                         </a>
                     </li>
 
