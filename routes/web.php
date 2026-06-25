@@ -43,6 +43,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/{perceraian}/print', [App\Http\Controllers\PerceraianController::class, 'printPdf'])->name('print');
         Route::post('/{perceraian}/dokumen/{dokumen}/create-drive-folder', [App\Http\Controllers\PerceraianController::class, 'createDriveFolder'])->name('dokumen.create-drive-folder');
         Route::post('/{perceraian}/ms-tms/{value}', [App\Http\Controllers\PerceraianController::class, 'updateMsTms'])->name('ms-tms');
+        Route::get('/{perceraian}/surat-panggilan/{pihak}', [App\Http\Controllers\PerceraianController::class, 'suratPanggilan'])->name('surat-panggilan');
+        Route::get('/{perceraian}/laporan', [App\Http\Controllers\PerceraianController::class, 'laporan'])->name('laporan');
+        Route::get('/{perceraian}/rekomendasi', [App\Http\Controllers\PerceraianController::class, 'rekomendasi'])->name('rekomendasi');
     });
 });
 

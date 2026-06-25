@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\DokumenPerceraian;
 use App\Models\IzinPerceraian;
 use App\Models\Pegawai;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PerceraianController extends Controller
 {
@@ -47,21 +49,21 @@ class PerceraianController extends Controller
             'pegawai_id' => ['required', 'exists:pegawai,id'],
             'nama_pasangan' => ['nullable', 'string', 'max:255'],
             'sebagai' => ['required', 'in:penggugat,tergugat'],
+            'nomor_surat' => ['nullable', 'string', 'max:100'],
+            'surat_permohonan' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ];
 
-        // Hanya admin yang bisa mengisi tanggal & upload berita acara pemanggilan
+        // Hanya admin yang bisa mengisi tanggal pemanggilan
         if (Auth::user()->hasRole('admin')) {
             $rules['tanggal_pemanggilan'] = ['nullable', 'date'];
-            $rules['berita_acara_pemanggilan_file'] = ['nullable', 'file', 'mimes:pdf', 'max:10240'];
-            $rules['ms_tms'] = ['nullable', 'in:-1,0,1'];
         }
 
         $validated = $request->validate($rules);
 
-        // Upload file berita acara pemanggilan
-        if (Auth::user()->hasRole('admin') && $request->hasFile('berita_acara_pemanggilan_file')) {
-            $path = $request->file('berita_acara_pemanggilan_file')->store('berita_acara_pemanggilan', 'public');
-            $validated['berita_acara_pemanggilan_file'] = $path;
+        // Upload file surat permohonan
+        if ($request->hasFile('surat_permohonan')) {
+            $path = $request->file('surat_permohonan')->store('surat_permohonan', 'public');
+            $validated['surat_permohonan'] = $path;
         }
 
         $validated['created_by'] = Auth::id();
@@ -114,21 +116,21 @@ class PerceraianController extends Controller
             'sebagai' => ['required', 'in:penggugat,tergugat'],
             'status_izin_perceraian_id' => ['nullable', 'integer', 'exists:status_izin_perceraian,id'],
             'catatan' => ['nullable', 'string'],
+            'nomor_surat' => ['nullable', 'string', 'max:100'],
+            'surat_permohonan' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ];
 
-        // Hanya admin yang bisa mengisi tanggal & upload berita acara pemanggilan
+        // Hanya admin yang bisa mengisi tanggal pemanggilan
         if (Auth::user()->hasRole('admin')) {
             $rules['tanggal_pemanggilan'] = ['nullable', 'date'];
-            $rules['berita_acara_pemanggilan_file'] = ['nullable', 'file', 'mimes:pdf', 'max:10240'];
-            $rules['ms_tms'] = ['nullable', 'in:-1,0,1'];
         }
 
         $validated = $request->validate($rules);
 
-        // Upload file berita acara pemanggilan
-        if (Auth::user()->hasRole('admin') && $request->hasFile('berita_acara_pemanggilan_file')) {
-            $path = $request->file('berita_acara_pemanggilan_file')->store('berita_acara_pemanggilan', 'public');
-            $validated['berita_acara_pemanggilan_file'] = $path;
+        // Upload file surat permohonan
+        if ($request->hasFile('surat_permohonan')) {
+            $path = $request->file('surat_permohonan')->store('surat_permohonan', 'public');
+            $validated['surat_permohonan'] = $path;
         }
 
         $perceraian->update($validated);
@@ -285,6 +287,47 @@ class PerceraianController extends Controller
         $this->authorizeAccess($perceraian);
         $perceraian->load('pegawai', 'dokumen', 'creator', 'statusIzin');
         return view('perceraian.print', compact('perceraian'));
+    }
+
+    // Generate surat panggilan PDF
+    public function suratPanggilan(IzinPerceraian $perceraian, string $pihak)
+    {
+        $this->authorizeAccess($perceraian);
+
+        if (!in_array($pihak, ['istri', 'suami'])) {
+            abort(404);
+        }
+
+        $perceraian->load('pegawai');
+        $pdf = Pdf::loadView('perceraian.surat_panggilan', compact('perceraian', 'pihak'));
+        $pdf->setPaper('A4');
+
+        // Simpan PDF ke storage
+        $filename = "surat_panggilan_{$pihak}_{$perceraian->id}.pdf";
+        $path = "surat_panggilan/{$filename}";
+        Storage::disk('public')->put($path, $pdf->output());
+
+        // Update kolom di database
+        $column = $pihak === 'istri' ? 'surat_panggilan_istri' : 'surat_panggilan_suami';
+        $perceraian->update([$column => $path]);
+
+        return redirect()->back()->with('success', 'Surat panggilan ' . $pihak . ' berhasil dibuat.');
+    }
+
+    // Halaman laporan pemanggilan
+    public function laporan(IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+        $perceraian->load('pegawai', 'dokumen', 'creator', 'statusIzin', 'logTms.creator');
+        return view('perceraian.laporan', compact('perceraian'));
+    }
+
+    // Halaman rekomendasi BKPSDM
+    public function rekomendasi(IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+        $perceraian->load('pegawai', 'statusIzin');
+        return view('perceraian.rekomendasi', compact('perceraian'));
     }
 
     private function authorizeAccess(IzinPerceraian $perceraian): void

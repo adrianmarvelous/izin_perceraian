@@ -10,7 +10,7 @@
                 <h5 class="mb-0">Buat Pengajuan Izin Perceraian</h5>
             </div>
             <div class="card-body">
-                <form action="{{ route('perceraian.store') }}" method="POST">
+                <form action="{{ route('perceraian.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="mb-3">
@@ -51,6 +51,22 @@
                             </div>
                         </div>
                         @error('sebagai')<div class="text-danger small">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nomor_surat" class="form-label">Nomor Surat Pengajuan</label>
+                        <input type="text" class="form-control @error('nomor_surat') is-invalid @enderror"
+                               id="nomor_surat" name="nomor_surat"
+                               value="{{ old('nomor_surat') }}" placeholder="Contoh: 800/123/BKPSDM">
+                        @error('nomor_surat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="surat_permohonan" class="form-label">Upload Surat Permohonan (PDF)</label>
+                        <input type="file" class="form-control @error('surat_permohonan') is-invalid @enderror"
+                               id="surat_permohonan" name="surat_permohonan" accept=".pdf">
+                        @error('surat_permohonan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <small class="text-muted">Format: PDF, maks 10MB</small>
                     </div>
 
                     <div class="mt-4">

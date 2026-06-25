@@ -27,7 +27,16 @@
                         ];
                         $statusBadge = $colors[$perceraian->status_izin_perceraian_id] ?? 'bg-label-secondary';
                     @endphp
-                    <span class="badge {{ $statusBadge }}">{{ $perceraian->statusIzin?->nama ?? 'Draft' }}</span>
+                    <span class="badge {{ $statusBadge }}">{{ $perceraian->statusIzin?->nama ?? 'Draft' }}</span><br>
+                    @if ($perceraian->nomor_surat)
+                        No. Surat: <strong>{{ $perceraian->nomor_surat }}</strong>
+                    @endif
+                    @if ($perceraian->surat_permohonan)
+                        @if ($perceraian->nomor_surat) | @endif
+                        <a href="{{ asset('storage/' . $perceraian->surat_permohonan) }}" target="_blank" class="text-decoration-underline">
+                            <i class="bx bx-file"></i> Surat Permohonan
+                        </a>
+                    @endif
                 </div>
 
                 {{-- Timeline Status --}}
@@ -225,17 +234,17 @@
                     </table>
                 </div>
 
-                {{-- Tanggal Pemanggilan & Berita Acara --}}
+                {{-- Data Pemanggilan & Surat Panggilan (Admin, hanya jika MS) --}}
                 @can('admin')
-                <form action="{{ route('perceraian.update', $perceraian) }}" method="POST" class="mb-4 mt-3 p-3 border rounded" enctype="multipart/form-data">
+                @if ($perceraian->ms_tms === 1)
+                <form action="{{ route('perceraian.update', $perceraian) }}" method="POST" class="mb-4 mt-3 p-3 border rounded">
                     @csrf @method('PUT')
                     <input type="hidden" name="pegawai_id" value="{{ $perceraian->pegawai_id }}">
                     <input type="hidden" name="nama_pasangan" value="{{ $perceraian->nama_pasangan }}">
                     <input type="hidden" name="sebagai" value="{{ $perceraian->sebagai }}">
                     <input type="hidden" name="catatan" value="{{ $perceraian->catatan }}">
-                    @if ($perceraian->ms_tms === 1)
                     <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
-                    <div class="row mt-2">
+                    <div class="row">
                         <div class="col-md-4 mb-2">
                             <label for="tanggal_pemanggilan" class="form-label">Tanggal Pemanggilan</label>
                             <input type="date" class="form-control form-control-sm @error('tanggal_pemanggilan') is-invalid @enderror"
@@ -243,69 +252,52 @@
                                    value="{{ old('tanggal_pemanggilan', $perceraian->tanggal_pemanggilan?->format('Y-m-d')) }}">
                             @error('tanggal_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
-                        <div class="col-md-8 mb-2">
-                            <label for="berita_acara_pemanggilan_file" class="form-label">Upload Berita Acara Pemanggilan (PDF)</label>
-                            <input type="file" class="form-control form-control-sm @error('berita_acara_pemanggilan_file') is-invalid @enderror"
-                                   id="berita_acara_pemanggilan_file" name="berita_acara_pemanggilan_file" accept=".pdf">
-                            @error('berita_acara_pemanggilan_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            @if ($perceraian->berita_acara_pemanggilan_file)
-                                <div class="mt-1">
-                                    <small class="text-success">
-                                        <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank">
-                                            <i class="bx bx-file"></i> Lihat file saat ini
-                                        </a>
-                                    </small>
-                                </div>
-                            @endif
-                            <small class="text-muted">Format: PDF, maks 10MB</small>
-                        </div>
                     </div>
-
                     <button type="submit" class="btn btn-sm btn-primary mt-1">
-                        <i class="bx bx-save"></i> Simpan Data Pemanggilan
+                        <i class="bx bx-save"></i> Simpan Tanggal Pemanggilan
                     </button>
-                    @endif
-                </form>
-                @else
-                <div class="mb-4 p-3 border rounded">
-                    <div class="row">
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label">MS / TMS</label>
-                            <div>
-                                @if ($perceraian->ms_tms === 1)
-                                    <span class="badge bg-label-success">MS</span>
-                                @elseif ($perceraian->ms_tms === -1)
-                                    <span class="badge bg-label-danger">TMS</span>
-                                @else
-                                    <span class="badge bg-label-secondary">-</span>
+                    @if ($perceraian->tanggal_pemanggilan)
+                    <div class="row mt-2">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Surat Panggilan Istri</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'istri']) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bx bx-file"></i> Buat Surat Panggilan
+                                </a>
+                                @if ($perceraian->surat_panggilan_istri)
+                                    <a href="{{ asset('storage/' . $perceraian->surat_panggilan_istri) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                        <i class="bx bx-show"></i> Lihat PDF
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Surat Panggilan Suami</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'suami']) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bx bx-file"></i> Buat Surat Panggilan
+                                </a>
+                                @if ($perceraian->surat_panggilan_suami)
+                                    <a href="{{ asset('storage/' . $perceraian->surat_panggilan_suami) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                        <i class="bx bx-show"></i> Lihat PDF
+                                    </a>
                                 @endif
                             </div>
                         </div>
                     </div>
-
-                    @if ($perceraian->ms_tms === 1)
-                    <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
-                    <div class="row mt-2">
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label">Tanggal Pemanggilan</label>
-                            <input type="text" class="form-control form-control-sm"
-                                   value="{{ $perceraian->tanggal_pemanggilan?->format('d M Y') ?? '-' }}" readonly>
-                        </div>
-                        <div class="col-md-8 mb-2">
-                            <label class="form-label">Berita Acara Pemanggilan</label>
-                            @if ($perceraian->berita_acara_pemanggilan_file)
-                                <div>
-                                    <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                        <i class="bx bx-file"></i> Lihat PDF
-                                    </a>
-                                </div>
-                            @else
-                                <textarea class="form-control form-control-sm" rows="2" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
-                            @endif
-                        </div>
+                    <div class="mt-3 d-flex gap-2">
+                        <a href="{{ route('perceraian.laporan', $perceraian) }}" class="btn btn-sm btn-info">
+                            <i class="bx bx-notepad"></i> Buat Laporan
+                        </a>
+                        @if (($perceraian->pegawai->id_gol ?? 0) < 9)
+                            <a href="{{ route('perceraian.rekomendasi', $perceraian) }}" class="btn btn-sm btn-warning">
+                                <i class="bx bx-receipt"></i> Buat Rekomendasi
+                            </a>
+                        @endif
                     </div>
                     @endif
-                </div>
+                </form>
+                @endif
                 @endcan
 
                 {{-- Log TMS --}}

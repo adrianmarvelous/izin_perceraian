@@ -15,10 +15,12 @@ class IzinPerceraian extends Model
         'sebagai',
         'status',
         'catatan',
+        'nomor_surat',
+        'surat_permohonan',
         'ms_tms',
         'tanggal_pemanggilan',
-        'berita_acara_pemanggilan',
-        'berita_acara_pemanggilan_file',
+        'surat_panggilan_istri',
+        'surat_panggilan_suami',
         'created_by',
     ];
 

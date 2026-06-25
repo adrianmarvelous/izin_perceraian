@@ -53,6 +53,31 @@
                         @error('sebagai')<div class="text-danger small">{{ $message }}</div>@enderror
                     </div>
 
+                    <div class="mb-3">
+                        <label for="nomor_surat" class="form-label">Nomor Surat Pengajuan</label>
+                        <input type="text" class="form-control @error('nomor_surat') is-invalid @enderror"
+                               id="nomor_surat" name="nomor_surat"
+                               value="{{ old('nomor_surat', $perceraian->nomor_surat) }}">
+                        @error('nomor_surat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="surat_permohonan" class="form-label">Upload Surat Permohonan (PDF)</label>
+                        <input type="file" class="form-control @error('surat_permohonan') is-invalid @enderror"
+                               id="surat_permohonan" name="surat_permohonan" accept=".pdf">
+                        @error('surat_permohonan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        @if ($perceraian->surat_permohonan)
+                            <div class="mt-1">
+                                <small class="text-success">
+                                    <a href="{{ asset('storage/' . $perceraian->surat_permohonan) }}" target="_blank">
+                                        <i class="bx bx-file"></i> Lihat file saat ini
+                                    </a>
+                                </small>
+                            </div>
+                        @endif
+                        <small class="text-muted">Format: PDF, maks 10MB. Kosongkan jika tidak ingin mengganti.</small>
+                    </div>
+
                     @can('admin')
                     <div class="mb-3">
                         <label for="status_izin_perceraian_id" class="form-label">Status</label>
@@ -110,20 +135,31 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="berita_acara_pemanggilan_file" class="form-label">Upload Berita Acara Pemanggilan (PDF)</label>
-                        <input type="file" class="form-control @error('berita_acara_pemanggilan_file') is-invalid @enderror"
-                               id="berita_acara_pemanggilan_file" name="berita_acara_pemanggilan_file" accept=".pdf">
-                        @error('berita_acara_pemanggilan_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        @if ($perceraian->berita_acara_pemanggilan_file)
-                            <div class="mt-1">
-                                <small class="text-success">
-                                    <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank">
-                                        <i class="bx bx-file"></i> Lihat file saat ini
-                                    </a>
-                                </small>
-                            </div>
-                        @endif
-                        <small class="text-muted">Format: PDF, maks 10MB</small>
+                        <label class="form-label">Surat Panggilan Istri</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'istri']) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bx bx-file"></i> Buat Surat Panggilan
+                            </a>
+                            @if ($perceraian->surat_panggilan_istri)
+                                <a href="{{ asset('storage/' . $perceraian->surat_panggilan_istri) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                    <i class="bx bx-show"></i> Lihat PDF
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Surat Panggilan Suami</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'suami']) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bx bx-file"></i> Buat Surat Panggilan
+                            </a>
+                            @if ($perceraian->surat_panggilan_suami)
+                                <a href="{{ asset('storage/' . $perceraian->surat_panggilan_suami) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                    <i class="bx bx-show"></i> Lihat PDF
+                                </a>
+                            @endif
+                        </div>
                     </div>
                     @endif
                     @endcan
@@ -147,20 +183,26 @@
                         <label class="form-label">Tanggal Pemanggilan</label>
                         <input type="text" class="form-control" value="{{ $perceraian->tanggal_pemanggilan?->format('d M Y') ?? '-' }}" readonly>
                     </div>
-
+                    @if ($perceraian->surat_panggilan_istri)
                     <div class="mb-3">
-                        <label class="form-label">Berita Acara Pemanggilan</label>
-                        @if ($perceraian->berita_acara_pemanggilan_file)
-                            <div>
-                                <a href="{{ asset('storage/' . $perceraian->berita_acara_pemanggilan_file) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                    <i class="bx bx-file"></i> Lihat PDF
-                                </a>
-                            </div>
-                        @else
-                            <textarea class="form-control" rows="3" readonly>{{ $perceraian->berita_acara_pemanggilan ?? '-' }}</textarea>
-                        @endif
+                        <label class="form-label">Surat Panggilan Istri</label>
+                        <div>
+                            <a href="{{ asset('storage/' . $perceraian->surat_panggilan_istri) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="bx bx-file"></i> Lihat PDF
+                            </a>
+                        </div>
                     </div>
-
+                    @endif
+                    @if ($perceraian->surat_panggilan_suami)
+                    <div class="mb-3">
+                        <label class="form-label">Surat Panggilan Suami</label>
+                        <div>
+                            <a href="{{ asset('storage/' . $perceraian->surat_panggilan_suami) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="bx bx-file"></i> Lihat PDF
+                            </a>
+                        </div>
+                    </div>
+                    @endif
                     @endif
                     @endcannot
 
