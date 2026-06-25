@@ -145,7 +145,7 @@ class PerceraianController extends Controller
     // Halaman kelola dokumen pendukung
     public function dokumen(IzinPerceraian $perceraian)
     {
-        $perceraian->load('pegawai', 'dokumen', 'statusIzin');
+        $perceraian->load('pegawai', 'dokumen', 'statusIzin', 'logTms.creator');
         return view('perceraian.dokumen', compact('perceraian'));
     }
 
@@ -254,6 +254,16 @@ class PerceraianController extends Controller
         }
 
         $perceraian->update(['ms_tms' => $value]);
+
+        // Simpan log jika TMS
+        if ($value === -1) {
+            $request->validate(['alasan' => ['required', 'string', 'max:1000']]);
+            $perceraian->logTms()->create([
+                'alasan' => $request->alasan,
+                'created_by' => Auth::id(),
+            ]);
+            $perceraian->update(['status_izin_perceraian_id' => 1]);
+        }
 
         return response()->json([
             'success' => true,

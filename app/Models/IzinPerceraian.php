@@ -51,4 +51,9 @@ class IzinPerceraian extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function logTms()
+    {
+        return $this->hasMany(LogTms::class, 'izin_perceraian_id');
+    }
 }
