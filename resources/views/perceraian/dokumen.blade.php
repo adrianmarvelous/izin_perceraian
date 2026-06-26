@@ -246,10 +246,10 @@
                     <h6 class="mb-3"><i class="bx bx-calendar"></i> Data Pemanggilan</h6>
                     <div class="row">
                         <div class="col-md-4 mb-2">
-                            <label for="tanggal_pemanggilan" class="form-label">Tanggal Pemanggilan</label>
-                            <input type="date" class="form-control form-control-sm @error('tanggal_pemanggilan') is-invalid @enderror"
+                            <label for="tanggal_pemanggilan" class="form-label">Tanggal & Jam Pemanggilan</label>
+                            <input type="datetime-local" class="form-control form-control-sm @error('tanggal_pemanggilan') is-invalid @enderror"
                                    id="tanggal_pemanggilan" name="tanggal_pemanggilan"
-                                   value="{{ old('tanggal_pemanggilan', $perceraian->tanggal_pemanggilan?->format('Y-m-d')) }}">
+                                   value="{{ old('tanggal_pemanggilan', $perceraian->tanggal_pemanggilan?->format('Y-m-d\TH:i')) }}">
                             @error('tanggal_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
@@ -259,33 +259,43 @@
                     @if ($perceraian->tanggal_pemanggilan)
                     <div class="row mt-2">
                         <div class="col-md-6 mb-2">
-                            <label class="form-label">Surat Panggilan Istri</label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'istri']) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bx bx-file"></i> Buat Surat Panggilan
+                            <label class="form-label">Surat Panggilan</label>
+                            <div>
+                                <a href="{{ route('perceraian.surat-panggilan', $perceraian) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                    <i class="bx bx-show"></i> Lihat PDF Surat Panggilan
                                 </a>
-                                @if ($perceraian->surat_panggilan_istri)
-                                    <a href="{{ asset('storage/' . $perceraian->surat_panggilan_istri) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                        <i class="bx bx-show"></i> Lihat PDF
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label">Surat Panggilan Suami</label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'suami']) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bx bx-file"></i> Buat Surat Panggilan
-                                </a>
-                                @if ($perceraian->surat_panggilan_suami)
-                                    <a href="{{ asset('storage/' . $perceraian->surat_panggilan_suami) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                        <i class="bx bx-show"></i> Lihat PDF
-                                    </a>
-                                @endif
                             </div>
                         </div>
                     </div>
-                    <div class="mt-3 d-flex gap-2">
+                    <div class="mt-3 d-flex gap-2 flex-wrap">
+                        @php
+                            $baPenggugat = $perceraian->berita_acara_penggugat || $perceraian->beritaAcaraTambahan->where('pihak', 'penggugat')->isNotEmpty();
+                            $baTergugat = $perceraian->berita_acara_tergugat || $perceraian->beritaAcaraTambahan->where('pihak', 'tergugat')->isNotEmpty();
+                        @endphp
+                        @if ($baPenggugat)
+                            <a href="{{ route('perceraian.berita-acara.pdf', [$perceraian, 'penggugat']) }}" target="_blank" class="btn btn-sm btn-success">
+                                <i class="bx bx-show"></i> Lihat BA Penggugat
+                            </a>
+                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'penggugat']) }}" class="btn btn-sm btn-warning">
+                                <i class="bx bx-edit-alt"></i> Edit BA Penggugat
+                            </a>
+                        @else
+                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'penggugat']) }}" class="btn btn-sm btn-secondary">
+                                <i class="bx bx-file"></i> Buat BA Penggugat
+                            </a>
+                        @endif
+                        @if ($baTergugat)
+                            <a href="{{ route('perceraian.berita-acara.pdf', [$perceraian, 'tergugat']) }}" target="_blank" class="btn btn-sm btn-success">
+                                <i class="bx bx-show"></i> Lihat BA Tergugat
+                            </a>
+                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'tergugat']) }}" class="btn btn-sm btn-warning">
+                                <i class="bx bx-edit-alt"></i> Edit BA Tergugat
+                            </a>
+                        @else
+                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'tergugat']) }}" target="_blank" class="btn btn-sm btn-secondary">
+                                <i class="bx bx-file"></i> Buat BA Tergugat
+                            </a>
+                        @endif
                         <a href="{{ route('perceraian.laporan', $perceraian) }}" class="btn btn-sm btn-info">
                             <i class="bx bx-notepad"></i> Buat Laporan
                         </a>

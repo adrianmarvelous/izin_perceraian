@@ -127,38 +127,19 @@
 
                     @if ($perceraian->ms_tms === 1 || old('ms_tms') === '1')
                     <div class="mb-3">
-                        <label for="tanggal_pemanggilan" class="form-label">Tanggal Pemanggilan</label>
-                        <input type="date" class="form-control @error('tanggal_pemanggilan') is-invalid @enderror"
+                        <label for="tanggal_pemanggilan" class="form-label">Tanggal & Jam Pemanggilan</label>
+                        <input type="datetime-local" class="form-control @error('tanggal_pemanggilan') is-invalid @enderror"
                                id="tanggal_pemanggilan" name="tanggal_pemanggilan"
-                               value="{{ old('tanggal_pemanggilan', $perceraian->tanggal_pemanggilan?->format('Y-m-d')) }}">
+                               value="{{ old('tanggal_pemanggilan', $perceraian->tanggal_pemanggilan?->format('Y-m-d\TH:i')) }}">
                         @error('tanggal_pemanggilan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Surat Panggilan Istri</label>
-                        <div class="d-flex gap-2 align-items-center">
-                            <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'istri']) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bx bx-file"></i> Buat Surat Panggilan
+                        <label class="form-label">Surat Panggilan</label>
+                        <div>
+                            <a href="{{ route('perceraian.surat-panggilan', $perceraian) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="bx bx-show"></i> Lihat PDF Surat Panggilan
                             </a>
-                            @if ($perceraian->surat_panggilan_istri)
-                                <a href="{{ asset('storage/' . $perceraian->surat_panggilan_istri) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                    <i class="bx bx-show"></i> Lihat PDF
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Surat Panggilan Suami</label>
-                        <div class="d-flex gap-2 align-items-center">
-                            <a href="{{ route('perceraian.surat-panggilan', [$perceraian, 'suami']) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bx bx-file"></i> Buat Surat Panggilan
-                            </a>
-                            @if ($perceraian->surat_panggilan_suami)
-                                <a href="{{ asset('storage/' . $perceraian->surat_panggilan_suami) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                    <i class="bx bx-show"></i> Lihat PDF
-                                </a>
-                            @endif
                         </div>
                     </div>
                     @endif
@@ -181,28 +162,16 @@
                     @if ($perceraian->ms_tms === 1)
                     <div class="mb-3">
                         <label class="form-label">Tanggal Pemanggilan</label>
-                        <input type="text" class="form-control" value="{{ $perceraian->tanggal_pemanggilan?->format('d M Y') ?? '-' }}" readonly>
+                        <input type="text" class="form-control" value="{{ $perceraian->tanggal_pemanggilan?->format('d M Y H:i') ?? '-' }}" readonly>
                     </div>
-                    @if ($perceraian->surat_panggilan_istri)
                     <div class="mb-3">
-                        <label class="form-label">Surat Panggilan Istri</label>
+                        <label class="form-label">Surat Panggilan</label>
                         <div>
-                            <a href="{{ asset('storage/' . $perceraian->surat_panggilan_istri) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                <i class="bx bx-file"></i> Lihat PDF
+                            <a href="{{ route('perceraian.surat-panggilan', $perceraian) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                <i class="bx bx-file"></i> Lihat PDF Surat Panggilan
                             </a>
                         </div>
                     </div>
-                    @endif
-                    @if ($perceraian->surat_panggilan_suami)
-                    <div class="mb-3">
-                        <label class="form-label">Surat Panggilan Suami</label>
-                        <div>
-                            <a href="{{ asset('storage/' . $perceraian->surat_panggilan_suami) }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                <i class="bx bx-file"></i> Lihat PDF
-                            </a>
-                        </div>
-                    </div>
-                    @endif
                     @endif
                     @endcannot
 

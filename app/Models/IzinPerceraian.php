@@ -21,6 +21,8 @@ class IzinPerceraian extends Model
         'tanggal_pemanggilan',
         'surat_panggilan_istri',
         'surat_panggilan_suami',
+        'berita_acara_penggugat',
+        'berita_acara_tergugat',
         'created_by',
     ];
 
@@ -29,7 +31,7 @@ class IzinPerceraian extends Model
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'tanggal_pemanggilan' => 'date',
+            'tanggal_pemanggilan' => 'datetime',
             'ms_tms' => 'integer',
         ];
     }
@@ -57,5 +59,20 @@ class IzinPerceraian extends Model
     public function logTms()
     {
         return $this->hasMany(LogTms::class, 'izin_perceraian_id');
+    }
+
+    public function beritaAcaraTambahan()
+    {
+        return $this->hasMany(BeritaAcaraTambahan::class, 'izin_perceraian_id');
+    }
+
+    public function beritaAcaraJawaban()
+    {
+        return $this->hasMany(BeritaAcaraJawaban::class, 'izin_perceraian_id');
+    }
+
+    public function beritaAcaraPemeriksa()
+    {
+        return $this->hasMany(BeritaAcaraPemeriksa::class, 'izin_perceraian_id');
     }
 }

@@ -43,9 +43,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/{perceraian}/print', [App\Http\Controllers\PerceraianController::class, 'printPdf'])->name('print');
         Route::post('/{perceraian}/dokumen/{dokumen}/create-drive-folder', [App\Http\Controllers\PerceraianController::class, 'createDriveFolder'])->name('dokumen.create-drive-folder');
         Route::post('/{perceraian}/ms-tms/{value}', [App\Http\Controllers\PerceraianController::class, 'updateMsTms'])->name('ms-tms');
-        Route::get('/{perceraian}/surat-panggilan/{pihak}', [App\Http\Controllers\PerceraianController::class, 'suratPanggilan'])->name('surat-panggilan');
+        Route::get('/{perceraian}/surat-panggilan', [App\Http\Controllers\PerceraianController::class, 'suratPanggilan'])->name('surat-panggilan');
         Route::get('/{perceraian}/laporan', [App\Http\Controllers\PerceraianController::class, 'laporan'])->name('laporan');
+        Route::get('/{perceraian}/laporan/pdf', [App\Http\Controllers\PerceraianController::class, 'laporanPdf'])->name('laporan.pdf');
         Route::get('/{perceraian}/rekomendasi', [App\Http\Controllers\PerceraianController::class, 'rekomendasi'])->name('rekomendasi');
+        Route::get('/{perceraian}/berita-acara/{pihak}', [App\Http\Controllers\PerceraianController::class, 'beritaAcara'])->name('berita-acara');
+        Route::post('/{perceraian}/berita-acara/{pihak}', [App\Http\Controllers\PerceraianController::class, 'simpanBeritaAcara'])->name('berita-acara.store');
+        Route::get('/{perceraian}/berita-acara/{pihak}/pdf', [App\Http\Controllers\PerceraianController::class, 'beritaAcaraPdf'])->name('berita-acara.pdf');
+        Route::get('/{perceraian}/berita-acara/{pihak}/pdf', [App\Http\Controllers\PerceraianController::class, 'beritaAcaraPdf'])->name('berita-acara.pdf');
+        Route::post('/{perceraian}/teruskan-walikota', [App\Http\Controllers\PerceraianController::class, 'teruskanWalikota'])->name('teruskan-walikota');
     });
 });
 
