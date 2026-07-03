@@ -267,48 +267,93 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mt-3 d-flex gap-2 flex-wrap">
-                        @php
-                            $baPenggugat = $perceraian->berita_acara_penggugat || $perceraian->beritaAcaraTambahan->where('pihak', 'penggugat')->isNotEmpty();
-                            $baTergugat = $perceraian->berita_acara_tergugat || $perceraian->beritaAcaraTambahan->where('pihak', 'tergugat')->isNotEmpty();
-                        @endphp
-                        @if ($baPenggugat)
-                            <a href="{{ route('perceraian.berita-acara.pdf', [$perceraian, 'penggugat']) }}" target="_blank" class="btn btn-sm btn-success">
-                                <i class="bx bx-show"></i> Lihat BA Penggugat
-                            </a>
-                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'penggugat']) }}" class="btn btn-sm btn-warning">
-                                <i class="bx bx-edit-alt"></i> Edit BA Penggugat
-                            </a>
-                        @else
-                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'penggugat']) }}" class="btn btn-sm btn-secondary">
-                                <i class="bx bx-file"></i> Buat BA Penggugat
-                            </a>
-                        @endif
-                        @if ($baTergugat)
-                            <a href="{{ route('perceraian.berita-acara.pdf', [$perceraian, 'tergugat']) }}" target="_blank" class="btn btn-sm btn-success">
-                                <i class="bx bx-show"></i> Lihat BA Tergugat
-                            </a>
-                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'tergugat']) }}" class="btn btn-sm btn-warning">
-                                <i class="bx bx-edit-alt"></i> Edit BA Tergugat
-                            </a>
-                        @else
-                            <a href="{{ route('perceraian.berita-acara', [$perceraian, 'tergugat']) }}" target="_blank" class="btn btn-sm btn-secondary">
-                                <i class="bx bx-file"></i> Buat BA Tergugat
-                            </a>
-                        @endif
-                        <a href="{{ route('perceraian.laporan', $perceraian) }}" class="btn btn-sm btn-info">
-                            <i class="bx bx-notepad"></i> Buat Laporan
-                        </a>
-                        @if (($perceraian->pegawai->id_gol ?? 0) < 9)
-                            <a href="{{ route('perceraian.rekomendasi', $perceraian) }}" class="btn btn-sm btn-warning">
-                                <i class="bx bx-receipt"></i> Buat Rekomendasi
-                            </a>
-                        @endif
+                    {{-- Berita Acara --}}
+                    <div class="mt-3">
+                        <label class="form-label fw-bold mb-2">Berita Acara Mediasi</label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            @php
+                                $baPenggugat = $perceraian->berita_acara_penggugat || $perceraian->beritaAcaraTambahan->where('pihak', 'penggugat')->isNotEmpty();
+                                $baTergugat = $perceraian->berita_acara_tergugat || $perceraian->beritaAcaraTambahan->where('pihak', 'tergugat')->isNotEmpty();
+                            @endphp
+                            <div class="d-flex gap-1 align-items-center">
+                                <span class="me-1 text-muted" style="font-size:13px;">Penggugat:</span>
+                                @if ($baPenggugat)
+                                    <a href="{{ route('perceraian.berita-acara.pdf', [$perceraian, 'penggugat']) }}" target="_blank" class="btn btn-sm btn-success">
+                                        <i class="bx bx-show"></i> Lihat
+                                    </a>
+                                    <a href="{{ route('perceraian.berita-acara', [$perceraian, 'penggugat']) }}" class="btn btn-sm btn-warning">
+                                        <i class="bx bx-edit-alt"></i> Edit
+                                    </a>
+                                @else
+                                    <a href="{{ route('perceraian.berita-acara', [$perceraian, 'penggugat']) }}" class="btn btn-sm btn-secondary">
+                                        <i class="bx bx-file"></i> Buat
+                                    </a>
+                                @endif
+                            </div>
+                            <div class="d-flex gap-1 align-items-center">
+                                <span class="me-1 text-muted" style="font-size:13px;">Tergugat:</span>
+                                @if ($baTergugat)
+                                    <a href="{{ route('perceraian.berita-acara.pdf', [$perceraian, 'tergugat']) }}" target="_blank" class="btn btn-sm btn-success">
+                                        <i class="bx bx-show"></i> Lihat
+                                    </a>
+                                    <a href="{{ route('perceraian.berita-acara', [$perceraian, 'tergugat']) }}" class="btn btn-sm btn-warning">
+                                        <i class="bx bx-edit-alt"></i> Edit
+                                    </a>
+                                @else
+                                    <a href="{{ route('perceraian.berita-acara', [$perceraian, 'tergugat']) }}" target="_blank" class="btn btn-sm btn-secondary">
+                                        <i class="bx bx-file"></i> Buat
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
                     </div>
+
                     @endif
                 </form>
                 @endif
+
                 @endcan
+
+                {{-- Laporan & Aksi --}}
+                @php
+                    $laporanLengkap = $perceraian->laporan_fakta
+                        && $perceraian->laporan_analisis
+                        && $perceraian->laporan_kesimpulan
+                        && $perceraian->laporan_saran;
+                    $golId = $perceraian->pegawai->id_gol ?? 0;
+                @endphp
+                @if ($laporanLengkap)
+                <div class="mt-3 p-3 border rounded">
+                    <label class="form-label fw-bold mb-2">Laporan &amp; Tindak Lanjut</label>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <a href="{{ route('perceraian.laporan', $perceraian) }}" class="btn btn-sm btn-info">
+                            <i class="bx bx-notepad"></i> Buat / Edit Laporan
+                        </a>
+                        @if ($golId >= 9)
+                            @if($perceraian->status_izin_perceraian_id == 2)
+                                <form action="{{ route('perceraian.teruskan-walikota', $perceraian) }}" method="POST" style="display:inline" id="formTeruskanWalikota">
+                                    @csrf
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiTeruskan()">
+                                        <i class="bx bx-send"></i> Teruskan ke Walikota
+                                    </button>
+                                </form>
+                            @endif
+                        @else
+                            <form action="{{ route('perceraian.rekomendasi-opd', $perceraian) }}" method="POST" style="display:inline" id="formRekomendasiOpd">
+                                @csrf
+                                <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiRekomendasi()">
+                                    <i class="bx bx-receipt"></i> Rekomendasi ke OPD Asal
+                                </button>
+                            </form>
+                        @endif
+                        @role('walikota')
+                        <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-sm btn-danger">
+                            <i class="bx bx-file"></i> Buat SK
+                        </a>
+                        @endrole
+                    </div>
+                </div>
+                @endif
 
                 {{-- Log TMS --}}
                 @if ($perceraian->logTms->isNotEmpty())
@@ -331,6 +376,11 @@
                     <a href="{{ route('perceraian.index') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back"></i> Kembali
                     </a>
+                    {{-- @role('walikota')
+                    <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-danger">
+                        <i class="bx bx-file"></i> Buat SK
+                    </a>
+                    @endrole --}}
                     @can('admin')
                     <div class="d-flex gap-1 ms-auto" id="msTmsButtons">
                         <button type="button" class="btn btn-sm {{ $perceraian->ms_tms === 1 ? 'btn-success' : 'btn-outline-success' }}"
@@ -617,6 +667,42 @@ function updateMsTms(perceraianId, value) {
             btnTms.disabled = false;
             statusSpan.innerHTML = '';
         });
+    });
+}
+
+// Konfirmasi SweetAlert untuk Teruskan ke Walikota
+function konfirmasiTeruskan() {
+    Swal.fire({
+        title: 'Teruskan ke Walikota?',
+        text: 'Pengajuan ini akan diteruskan ke Walikota untuk mendapatkan rekomendasi.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ffab00',
+        cancelButtonColor: '#697a8d',
+        confirmButtonText: 'Ya, Teruskan!',
+        cancelButtonText: 'Batal',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('formTeruskanWalikota').submit();
+        }
+    });
+}
+
+// Konfirmasi SweetAlert untuk Rekomendasi ke OPD Asal
+function konfirmasiRekomendasi() {
+    Swal.fire({
+        title: 'Kirim Rekomendasi?',
+        text: 'Rekomendasi ini akan dikirim ke OPD Asal untuk ditindaklanjuti.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ffab00',
+        cancelButtonColor: '#697a8d',
+        confirmButtonText: 'Ya, Kirim!',
+        cancelButtonText: 'Batal',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('formRekomendasiOpd').submit();
+        }
     });
 }
 </script>

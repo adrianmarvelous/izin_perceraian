@@ -20,6 +20,10 @@ class PerceraianController extends Controller
             $data = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
                 ->where('status_izin_perceraian_id', 2)
                 ->latest()->get();
+        } elseif ($user->hasRole('walikota')) {
+            $data = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
+                ->where('status_izin_perceraian_id', 4)
+                ->latest()->get();
         } else {
             // OPD hanya lihat pengajuan dari pegawai di OPD-nya
             $pegawaiIds = Pegawai::where('opd', $user->name)->pluck('id');
@@ -311,6 +315,23 @@ class PerceraianController extends Controller
         return view('perceraian.laporan', compact('perceraian'));
     }
 
+    public function simpanLaporan(Request $request, IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+
+        $validated = $request->validate([
+            'laporan_fakta' => ['nullable', 'string'],
+            'laporan_analisis' => ['nullable', 'string'],
+            'laporan_kesimpulan' => ['nullable', 'string'],
+            'laporan_saran' => ['nullable', 'string'],
+        ]);
+
+        $perceraian->update($validated);
+
+        return redirect()->route('perceraian.laporan', $perceraian)
+            ->with('success', 'Konten laporan berhasil disimpan.');
+    }
+
     public function laporanPdf(IzinPerceraian $perceraian)
     {
         $this->authorizeAccess($perceraian);
@@ -486,6 +507,24 @@ class PerceraianController extends Controller
 
         return redirect()->route('perceraian.dokumen', $perceraian)
             ->with('success', 'Pengajuan berhasil diteruskan ke Walikota.');
+    }
+
+    public function rekomendasiOpd(IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+
+        $perceraian->update([
+            'status_izin_perceraian_id' => 3,
+        ]);
+
+        return redirect()->route('perceraian.dokumen', $perceraian)
+            ->with('success', 'Rekomendasi berhasil dikirim ke OPD Asal.');
+    }
+
+    public function skWalikota(IzinPerceraian $perceraian)
+    {
+        $perceraian->load('pegawai.golongan');
+        return view('perceraian.sk_walikota', compact('perceraian'));
     }
 
     private function authorizeAccess(IzinPerceraian $perceraian): void

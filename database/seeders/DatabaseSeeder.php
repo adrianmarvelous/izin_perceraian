@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RoleSeeder::class);
+        $this->call(WalikotaRoleSeeder::class);
+        $this->call(WalikotaUserSeeder::class);
 
         $user = User::factory()->create([
             'name' => 'Admin',

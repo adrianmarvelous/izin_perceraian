@@ -32,6 +32,7 @@
     ];
 @endphp
 
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
 <style>
     .laporan-body {
         font-family: 'Times New Roman', Times, serif;
@@ -169,48 +170,39 @@
                     Surat permohonan izin perceraian a.n. {{ $pegawai->nama ?? '-' }}, telah dilakukan verifikasi proses pembinaan internal ASN yang telah dilaksanakan oleh Unit Kerja/Perangkat Daerah ASN yang bersangkutan, melalui pemanggilan dan wawancara terhadap ASN yang bersangkutan.
                 </div>
 
-                {{-- II. Fakta dan Data --}}
-                <div class="section-title">II. Fakta dan data yang disajikan</div>
-                <div class="isi-section">
-                    Bahwa dari hasil mediasi/pembinaan perceraian sebagaimana tertuang pada Berita Acara Mediasi, dapat diketahui beberapa informasi sebagai berikut;
-                    <ol style="margin-top:5px;">
-                        <li>Pihak {{ ucfirst($pihakLawan) }} ({{ $namaPasangan }}) dan Pihak {{ ucfirst($pihakPegawai) }} ({{ $pegawai->nama ?? '-' }}) sudah tidak lagi tinggal serumah;</li>
-                        <li>Kedua belah pihak telah bersepakat untuk berpisah;</li>
-                        <li>Atasan langsung yang bersangkutan telah memanggil kedua belah pihak untuk dilakukan mediasi, nasihat, dan bimbingan agar hubungan baik terjalin kembali, namun mediasi gagal.</li>
-                    </ol>
-                </div>
+                <form method="POST" action="{{ route('perceraian.laporan.simpan', $perceraian) }}" id="formLaporan">
+                    @csrf
 
-                {{-- III. Analisis dan Pembahasan --}}
-                <div class="section-title">III. Analisis dan Pembahasan</div>
-                <div class="isi-section">
-                    <ol>
-                        <li>
-                            {{ $sebutan }}. {{ $pegawai->nama ?? '-' }} telah mengikuti prosedur Kepegawaian sesuai dengan Peraturan Pemerintah Nomor 10 Tahun 1983 tentang Izin Perkawinan dan Perceraian Bagi Pegawai Negeri Sipil, sebagaimana telah diubah dengan Peraturan Pemerintah Nomor: 45 Tahun 1990, terutama pasal 3 ayat (1) yang menyatakan bahwa "Pegawai Negeri Sipil yang akan Melakukan perceraian wajib memperoleh ijin atau Surat Keterangan lebih dahulu dari Pejabat."
-                        </li>
-                        <li>
-                            Berdasarkan fakta dan data pada poin II, telah memenuhi alasan-alasan yang tertuang dalam Surat Edaran Kepala BKN Nomor 8/SE/1983 tentang izin perkawinan dan perceraian.
-                        </li>
-                    </ol>
-                </div>
+                    {{-- II. Fakta dan Data --}}
+                    <div class="section-title">II. Fakta dan data yang disajikan</div>
+                    <div class="isi-section">
+                        <textarea name="laporan_fakta" id="laporan_fakta" class="form-control" rows="6">{{ old('laporan_fakta', $perceraian->laporan_fakta ?? 'Bahwa dari hasil mediasi/pembinaan perceraian sebagaimana tertuang pada Berita Acara Mediasi, dapat diketahui beberapa informasi sebagai berikut;
 
-                {{-- IV. Kesimpulan --}}
-                <div class="section-title">IV. Kesimpulan</div>
-                <div class="isi-section">
-                    <ol>
-                        <li>
-                            Bahwa berdasarkan fakta-fakta dan informasi yang dihimpun pada seluruh proses pembinaan/mediasi perceraian, ASN atas nama {{ $pegawai->nama ?? '-' }}, NIP. {{ $pegawai->nip ?? '-' }}, Golongan {{ $golText }}, Jabatan {{ $pegawai->jabatan ?? '-' }}, Unit Kerja {{ $pegawai->opd ?? '-' }}, telah memenuhi kriteria sebagaimana diatur dalam peraturan yang berlaku.
-                        </li>
-                        <li>
-                            Bahwa berdasarkan fakta-fakta dan informasi yang dihimpun pada seluruh proses pembinaan/mediasi perceraian, terlihat bahwa kedua belah pihak sudah tidak bisa dirukunkan atau disatukan lagi.
-                        </li>
-                    </ol>
-                </div>
+1. Pihak ' . ucfirst($pihakLawan) . ' (' . $namaPasangan . ') dan Pihak ' . ucfirst($pihakPegawai) . ' (' . ($pegawai->nama ?? '-') . ') sudah tidak lagi tinggal serumah;
+2. Kedua belah pihak telah bersepakat untuk berpisah;
+3. Atasan langsung yang bersangkutan telah memanggil kedua belah pihak untuk dilakukan mediasi, nasihat, dan bimbingan agar hubungan baik terjalin kembali, namun mediasi gagal.') }}</textarea>
+                    </div>
 
-                {{-- V. Saran Tindak --}}
-                <div class="section-title">V. Saran Tindak</div>
-                <div class="isi-section">
-                    Dengan mempelajari alasan-alasan dan keterangan yang didapat pada saat pembinaan, maka kiranya agar dapat diterbitkan Surat Izin Perceraian.
-                </div>
+                    {{-- III. Analisis dan Pembahasan --}}
+                    <div class="section-title">III. Analisis dan Pembahasan</div>
+                    <div class="isi-section">
+                        <textarea name="laporan_analisis" id="laporan_analisis" class="form-control" rows="6">{{ old('laporan_analisis', $perceraian->laporan_analisis ?? '1. ' . $sebutan . '. ' . ($pegawai->nama ?? '-') . ' telah mengikuti prosedur Kepegawaian sesuai dengan Peraturan Pemerintah Nomor 10 Tahun 1983 tentang Izin Perkawinan dan Perceraian Bagi Pegawai Negeri Sipil, sebagaimana telah diubah dengan Peraturan Pemerintah Nomor: 45 Tahun 1990, terutama pasal 3 ayat (1) yang menyatakan bahwa "Pegawai Negeri Sipil yang akan Melakukan perceraian wajib memperoleh ijin atau Surat Keterangan lebih dahulu dari Pejabat."
+2. Berdasarkan fakta dan data pada poin II, telah memenuhi alasan-alasan yang tertuang dalam Surat Edaran Kepala BKN Nomor 8/SE/1983 tentang izin perkawinan dan perceraian.') }}</textarea>
+                    </div>
+
+                    {{-- IV. Kesimpulan --}}
+                    <div class="section-title">IV. Kesimpulan</div>
+                    <div class="isi-section">
+                        <textarea name="laporan_kesimpulan" id="laporan_kesimpulan" class="form-control" rows="6">{{ old('laporan_kesimpulan', $perceraian->laporan_kesimpulan ?? '1. Bahwa berdasarkan fakta-fakta dan informasi yang dihimpun pada seluruh proses pembinaan/mediasi perceraian, ASN atas nama ' . ($pegawai->nama ?? '-') . ', NIP. ' . ($pegawai->nip ?? '-') . ', Golongan ' . $golText . ', Jabatan ' . ($pegawai->jabatan ?? '-') . ', Unit Kerja ' . ($pegawai->opd ?? '-') . ', telah memenuhi kriteria sebagaimana diatur dalam peraturan yang berlaku.
+2. Bahwa berdasarkan fakta-fakta dan informasi yang dihimpun pada seluruh proses pembinaan/mediasi perceraian, terlihat bahwa kedua belah pihak sudah tidak bisa dirukunkan atau disatukan lagi.') }}</textarea>
+                    </div>
+
+                    {{-- V. Saran Tindak --}}
+                    <div class="section-title">V. Saran Tindak</div>
+                    <div class="isi-section">
+                        <textarea name="laporan_saran" id="laporan_saran" class="form-control" rows="4">{{ old('laporan_saran', $perceraian->laporan_saran ?? 'Dengan mempelajari alasan-alasan dan keterangan yang didapat pada saat pembinaan, maka kiranya agar dapat diterbitkan Surat Izin Perceraian.') }}</textarea>
+                    </div>
+                </form>
 
                 {{-- Tanda Tangan --}}
                 <table style="width:100%;margin-top:40px;">
@@ -231,7 +223,11 @@
             </div>
 
             <div class="card-footer">
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="submit" form="formLaporan" class="btn btn-success">
+                        <i class="bx bx-save"></i> Simpan Laporan
+                    </button>
+
                     <button onclick="window.print()" class="btn btn-primary">
                         <i class="bx bx-printer"></i> Cetak / PDF
                     </button>
@@ -241,4 +237,31 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
+<script>
+$(function () {
+    // Inisialisasi Summernote pada semua textarea laporan
+    $('textarea[id^="laporan_"]').summernote({
+        height: 200,
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['font', ['strikethrough', 'superscript', 'subscript']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['insert', ['link', 'picture']],
+            ['view', ['undo', 'redo', 'codeview']],
+        ],
+        placeholder: 'Tulis konten di sini...'
+    });
+
+    // Sebelum form disubmit, salin konten Summernote ke textarea asli
+    $('#formLaporan').on('submit', function () {
+        $('textarea[id^="laporan_"]').each(function () {
+            $(this).summernote('code');
+        });
+    });
+});
+</script>
+@endpush
 @endsection

@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{perceraian}/ms-tms/{value}', [App\Http\Controllers\PerceraianController::class, 'updateMsTms'])->name('ms-tms');
         Route::get('/{perceraian}/surat-panggilan', [App\Http\Controllers\PerceraianController::class, 'suratPanggilan'])->name('surat-panggilan');
         Route::get('/{perceraian}/laporan', [App\Http\Controllers\PerceraianController::class, 'laporan'])->name('laporan');
+        Route::post('/{perceraian}/laporan', [App\Http\Controllers\PerceraianController::class, 'simpanLaporan'])->name('laporan.simpan');
         Route::get('/{perceraian}/laporan/pdf', [App\Http\Controllers\PerceraianController::class, 'laporanPdf'])->name('laporan.pdf');
         Route::get('/{perceraian}/rekomendasi', [App\Http\Controllers\PerceraianController::class, 'rekomendasi'])->name('rekomendasi');
         Route::get('/{perceraian}/berita-acara/{pihak}', [App\Http\Controllers\PerceraianController::class, 'beritaAcara'])->name('berita-acara');
@@ -52,6 +53,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/{perceraian}/berita-acara/{pihak}/pdf', [App\Http\Controllers\PerceraianController::class, 'beritaAcaraPdf'])->name('berita-acara.pdf');
         Route::get('/{perceraian}/berita-acara/{pihak}/pdf', [App\Http\Controllers\PerceraianController::class, 'beritaAcaraPdf'])->name('berita-acara.pdf');
         Route::post('/{perceraian}/teruskan-walikota', [App\Http\Controllers\PerceraianController::class, 'teruskanWalikota'])->name('teruskan-walikota');
+        Route::post('/{perceraian}/rekomendasi-opd', [App\Http\Controllers\PerceraianController::class, 'rekomendasiOpd'])->name('rekomendasi-opd');
+        Route::get('/{perceraian}/sk', [App\Http\Controllers\PerceraianController::class, 'skWalikota'])->name('sk');
     });
 });
 

@@ -4,6 +4,12 @@
 
 @push('styles')
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+/* Fix dropdown terpotong oleh table-responsive */
+#perceraianTable_wrapper .dropdown-menu {
+    z-index: 1055;
+}
+</style>
 @endpush
 
 @section('content')
@@ -69,7 +75,7 @@
                                     <td>{{ $d->created_at->format('d M Y') }}</td>
                                     <td>
                                         <div class="dropdown">
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="window">
                                                 <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <div class="dropdown-menu">
@@ -114,8 +120,25 @@
 @push('scripts')
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
-if (document.querySelector('#perceraianTable')) {
-    new DataTable('#perceraianTable');
-}
+$(function () {
+    // Inisialisasi DataTable
+    if (document.querySelector('#perceraianTable')) {
+        new DataTable('#perceraianTable');
+    }
+
+    // Fix dropdown terpotong: ubah overflow table-responsive saat dropdown terbuka
+    $(document).on('show.bs.dropdown', '.table-responsive', function () {
+        $(this).css('overflow', 'visible');
+    }).on('hide.bs.dropdown', '.table-responsive', function () {
+        $(this).css('overflow', '');
+    });
+
+    // Alternatif: event langsung pada dropdown
+    $(document).on('show.bs.dropdown', '.dropdown', function () {
+        $(this).closest('.table-responsive').css('overflow', 'visible');
+    }).on('hide.bs.dropdown', '.dropdown', function () {
+        $(this).closest('.table-responsive').css('overflow', '');
+    });
+});
 </script>
 @endpush

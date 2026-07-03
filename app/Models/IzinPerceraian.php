@@ -23,6 +23,10 @@ class IzinPerceraian extends Model
         'surat_panggilan_suami',
         'berita_acara_penggugat',
         'berita_acara_tergugat',
+        'laporan_fakta',
+        'laporan_analisis',
+        'laporan_kesimpulan',
+        'laporan_saran',
         'created_by',
     ];
 
