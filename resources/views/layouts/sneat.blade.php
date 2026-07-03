@@ -186,9 +186,9 @@
                             <!-- User Dropdown -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                                    {{-- <div class="avatar avatar-online">
+                                    <div class="avatar avatar-online">
                                         <img src="{{ asset('templete/sneat/assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />
-                                    </div> --}}
+                                    </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
