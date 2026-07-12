@@ -114,6 +114,10 @@
                 <td style="text-align: left"></td>
             </tr>
             <tr>
+                <td style="height: 40px"></td>
+                <td style="text-align: left"></td>
+            </tr>
+            <tr>
                 <td style="width: 40%"></td>
                 <td style="text-align: left;text-decoration: underline">MURAJI.S.T.,M.Si</td>
             </tr>

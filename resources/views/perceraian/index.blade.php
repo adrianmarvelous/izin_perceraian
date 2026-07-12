@@ -23,93 +23,204 @@
                 </a>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table id="perceraianTable" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Pegawai</th>
-                                <th>NIP</th>
-                                <th>Pasangan</th>
-                                <th>Sebagai</th>
-                                <th>Status</th>
-                                <th>MS/TMS</th>
-                                <th>Dibuat</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($data as $d)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td><strong>{{ $d->pegawai->nama ?? '-' }}</strong></td>
-                                    <td><code>{{ $d->pegawai->nip ?? '-' }}</code></td>
-                                    <td>{{ $d->nama_pasangan ?? $d->pegawai->nama_pasangan ?? '-' }}</td>
-                                    <td>
-                                        <span class="badge {{ $d->sebagai == 'penggugat' ? 'bg-label-danger' : 'bg-label-info' }}">
-                                            {{ ucfirst($d->sebagai) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @php
-                                            $colors = [
-                                                1 => 'bg-label-secondary',
-                                                2 => 'bg-label-warning',
-                                                3 => 'bg-label-info',
-                                                4 => 'bg-label-primary',
-                                                5 => 'bg-label-success',
-                                            ];
-                                            $badge = $colors[$d->status_izin_perceraian_id] ?? 'bg-label-secondary';
-                                        @endphp
-                                        <span class="badge {{ $badge }}">{{ $d->statusIzin?->nama ?? 'Draft' }}</span>
-                                    </td>
-                                    <td>
-                                        @if ($d->ms_tms === 1)
-                                            <span class="badge bg-label-success">MS</span>
-                                        @elseif ($d->ms_tms === -1)
-                                            <span class="badge bg-label-danger">TMS</span>
-                                        @else
-                                            <span class="badge bg-label-secondary">-</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $d->created_at->format('d M Y') }}</td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="window">
-                                                <i class="bx bx-dots-vertical-rounded"></i>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a href="{{ route('perceraian.dokumen', $d) }}" class="dropdown-item">
-                                                    <i class="bx bx-file me-1"></i> Dokumen
-                                                </a>
-                                                <a href="{{ route('perceraian.print', $d) }}" target="_blank" class="dropdown-item">
-                                                    <i class="bx bx-printer me-1"></i> Cetak PDF
-                                                </a>
-                                                <a href="{{ route('perceraian.edit', $d) }}" class="dropdown-item">
-                                                    <i class="bx bx-edit-alt me-1"></i> Edit
-                                                </a>
-                                                @if (($d->status_izin_perceraian_id == 1 || is_null($d->status_izin_perceraian_id)) && !Auth::user()->hasRole('admin'))
-                                                <form action="{{ route('perceraian.ajukan', $d) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="dropdown-item">
-                                                        <i class="bx bx-send me-1"></i> Ajukan
-                                                    </button>
-                                                </form>
+                {{-- Tab navigasi khusus admin --}}
+                @can('admin')
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-aktif" data-bs-toggle="tab"
+                                data-bs-target="#pane-aktif" type="button" role="tab">
+                            <i class="bx bx-play-circle"></i> Izin Aktif
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-history" data-bs-toggle="tab"
+                                data-bs-target="#pane-history" type="button" role="tab">
+                            <i class="bx bx-history"></i> History
+                        </button>
+                    </li>
+                </ul>
+                @endcan
+
+                {{-- Tab content --}}
+                <div class="tab-content">
+                    {{-- Panel: Data aktif --}}
+                    <div class="tab-pane fade show active" id="pane-aktif" role="tabpanel">
+                        <div class="table-responsive">
+                            <table id="perceraianTable" class="table table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Pegawai</th>
+                                        <th>NIP</th>
+                                        <th>Pasangan</th>
+                                        <th>Sebagai</th>
+                                        <th>Status</th>
+                                        <th>MS/TMS</th>
+                                        <th>Dibuat</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($data as $d)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td><strong>{{ $d->pegawai->nama ?? '-' }}</strong></td>
+                                            <td><code>{{ $d->pegawai->nip ?? '-' }}</code></td>
+                                            <td>{{ $d->nama_pasangan ?? $d->pegawai->nama_pasangan ?? '-' }}</td>
+                                            <td>
+                                                <span class="badge {{ $d->sebagai == 'penggugat' ? 'bg-label-danger' : 'bg-label-info' }}">
+                                                    {{ ucfirst($d->sebagai) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $colors = [
+                                                        1 => 'bg-label-secondary',
+                                                        2 => 'bg-label-warning',
+                                                        3 => 'bg-label-info',
+                                                        4 => 'bg-label-primary',
+                                                        5 => 'bg-label-success',
+                                                    ];
+                                                    $badge = $colors[$d->status_izin_perceraian_id] ?? 'bg-label-secondary';
+                                                @endphp
+                                                <span class="badge {{ $badge }}">{{ $d->statusIzin?->nama ?? 'Draft' }}</span>
+                                            </td>
+                                            <td>
+                                                @if ($d->ms_tms === 1)
+                                                    <span class="badge bg-label-success">MS</span>
+                                                @elseif ($d->ms_tms === -1)
+                                                    <span class="badge bg-label-danger">TMS</span>
+                                                @else
+                                                    <span class="badge bg-label-secondary">-</span>
                                                 @endif
-                                                <form action="{{ route('perceraian.destroy', $d) }}" method="POST"
-                                                      onsubmit="return confirm('Yakin hapus?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="dropdown-item">
-                                                        <i class="bx bx-trash me-1"></i> Hapus
+                                            </td>
+                                            <td>{{ $d->created_at->format('d M Y') }}</td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="window">
+                                                        <i class="bx bx-dots-vertical-rounded"></i>
                                                     </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                                    <div class="dropdown-menu">
+                                                        <a href="{{ route('perceraian.dokumen', $d) }}" class="dropdown-item">
+                                                            <i class="bx bx-file me-1"></i> Dokumen
+                                                        </a>
+                                                        <a href="{{ route('perceraian.print', $d) }}" target="_blank" class="dropdown-item">
+                                                            <i class="bx bx-printer me-1"></i> Cetak PDF
+                                                        </a>
+                                                        <a href="{{ route('perceraian.edit', $d) }}" class="dropdown-item">
+                                                            <i class="bx bx-edit-alt me-1"></i> Edit
+                                                        </a>
+                                                        @if (($d->status_izin_perceraian_id == 1 || is_null($d->status_izin_perceraian_id)) && !Auth::user()->hasRole('admin'))
+                                                        <form action="{{ route('perceraian.ajukan', $d) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="dropdown-item">
+                                                                <i class="bx bx-send me-1"></i> Ajukan
+                                                            </button>
+                                                        </form>
+                                                        @endif
+                                                        <form action="{{ route('perceraian.destroy', $d) }}" method="POST"
+                                                              onsubmit="return confirm('Yakin hapus?')">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" class="dropdown-item">
+                                                                <i class="bx bx-trash me-1"></i> Hapus
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- Panel: History (khusus admin) --}}
+                    @can('admin')
+                    <div class="tab-pane fade" id="pane-history" role="tabpanel">
+                        <div class="table-responsive">
+                            <table id="historyTable" class="table table-hover" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Pegawai</th>
+                                        <th>NIP</th>
+                                        <th>Pasangan</th>
+                                        <th>Sebagai</th>
+                                        <th>Status</th>
+                                        <th>MS/TMS</th>
+                                        <th>Dibuat</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($history as $d)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td><strong>{{ $d->pegawai->nama ?? '-' }}</strong></td>
+                                            <td><code>{{ $d->pegawai->nip ?? '-' }}</code></td>
+                                            <td>{{ $d->nama_pasangan ?? $d->pegawai->nama_pasangan ?? '-' }}</td>
+                                            <td>
+                                                <span class="badge {{ $d->sebagai == 'penggugat' ? 'bg-label-danger' : 'bg-label-info' }}">
+                                                    {{ ucfirst($d->sebagai) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $badge = $colors[$d->status_izin_perceraian_id] ?? 'bg-label-secondary';
+                                                @endphp
+                                                <span class="badge {{ $badge }}">{{ $d->statusIzin?->nama ?? 'Draft' }}</span>
+                                            </td>
+                                            <td>
+                                                @if ($d->ms_tms === 1)
+                                                    <span class="badge bg-label-success">MS</span>
+                                                @elseif ($d->ms_tms === -1)
+                                                    <span class="badge bg-label-danger">TMS</span>
+                                                @else
+                                                    <span class="badge bg-label-secondary">-</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $d->created_at->format('d M Y') }}</td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="window">
+                                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a href="{{ route('perceraian.dokumen', $d) }}" class="dropdown-item">
+                                                            <i class="bx bx-file me-1"></i> Dokumen
+                                                        </a>
+                                                        <a href="{{ route('perceraian.print', $d) }}" target="_blank" class="dropdown-item">
+                                                            <i class="bx bx-printer me-1"></i> Cetak PDF
+                                                        </a>
+                                                        <a href="{{ route('perceraian.edit', $d) }}" class="dropdown-item">
+                                                            <i class="bx bx-edit-alt me-1"></i> Edit
+                                                        </a>
+                                                        @if ($d->status_izin_perceraian_id == 1 || is_null($d->status_izin_perceraian_id))
+                                                        <form action="{{ route('perceraian.ajukan', $d) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="dropdown-item">
+                                                                <i class="bx bx-send me-1"></i> Ajukan
+                                                            </button>
+                                                        </form>
+                                                        @endif
+                                                        <form action="{{ route('perceraian.destroy', $d) }}" method="POST"
+                                                              onsubmit="return confirm('Yakin hapus?')">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" class="dropdown-item">
+                                                                <i class="bx bx-trash me-1"></i> Hapus
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -124,6 +235,9 @@ $(function () {
     // Inisialisasi DataTable
     if (document.querySelector('#perceraianTable')) {
         new DataTable('#perceraianTable');
+    }
+    if (document.querySelector('#historyTable')) {
+        new DataTable('#historyTable');
     }
 
     // Fix dropdown terpotong: ubah overflow table-responsive saat dropdown terbuka

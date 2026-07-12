@@ -14,6 +14,7 @@
                 <div class="alert alert-info">
                     <strong>Informasi Pengajuan:</strong><br>
                     Pegawai: <strong>{{ $perceraian->pegawai->nama ?? '-' }}</strong> ({{ $perceraian->pegawai->nip ?? '-' }})<br>
+                    Golongan: {{ $perceraian->pegawai->golongan->gol_ruang ?? '-' }}<br>
                     Pasangan: {{ $perceraian->nama_pasangan ?? $perceraian->pegawai->nama_pasangan ?? '-' }}<br>
                     Sebagai: <strong>{{ ucfirst($perceraian->sebagai) }}</strong> |
                     Status: 
@@ -95,6 +96,10 @@
                     </div>
                 </div>
 
+                @php
+                    $adminKodes = ['admin_surat_panggilan', 'admin_ba_penggugat', 'admin_ba_tergugat', 'admin_laporan_mediasi', 'admin_rekomendasi_opd'];
+                @endphp
+
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead class="table-light">
@@ -108,6 +113,7 @@
                         </thead>
                         <tbody>
                             @foreach ($perceraian->dokumen as $dok)
+                                @php $isAdminDoc = in_array($dok->kode, $adminKodes); @endphp
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
@@ -117,6 +123,9 @@
                                         @endif
                                         @if ($dok->kondisi_wajib == 'pisah_rumah>=2_tahun')
                                             <br><small class="text-danger">* Wajib jika sudah pisah rumah &ge; 2 tahun</small>
+                                        @endif
+                                        @if ($isAdminDoc)
+                                            <span class="badge bg-label-info ms-1">Admin</span>
                                         @endif
                                     </td>
                                     <td>
@@ -146,14 +155,19 @@
                                         @endif
                                     </td>
                                     <td>
+                                        @if (!$isAdminDoc || auth()->user()->can('admin'))
                                         <button type="button" class="btn btn-sm btn-outline-primary"
                                                 data-bs-toggle="modal" data-bs-target="#dokumenModal{{ $dok->id }}">
                                             <i class="bx bx-edit-alt"></i> Update
                                         </button>
+                                        @else
+                                        <em class="text-muted">-</em>
+                                        @endif
                                     </td>
                                 </tr>
 
                                 <!-- Modal Update Dokumen -->
+                                @if (!$isAdminDoc || auth()->user()->can('admin'))
                                 <div class="modal fade" id="dokumenModal{{ $dok->id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <form action="{{ route('perceraian.dokumen.update', [$perceraian, $dok]) }}" method="POST"
@@ -229,6 +243,7 @@
                                         </form>
                                     </div>
                                 </div>
+                                @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -310,9 +325,7 @@
 
                     @endif
                 </form>
-                @endif
 
-                @endcan
 
                 {{-- Laporan & Aksi --}}
                 @php
@@ -326,7 +339,7 @@
                     <label class="form-label fw-bold mb-2">Laporan &amp; Tindak Lanjut</label>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
                         <a href="{{ route('perceraian.laporan', $perceraian) }}" class="btn btn-sm btn-info">
-                            <i class="bx bx-notepad"></i> Buat / Edit Laporan
+                            <i class="bx bx-notepad"></i> Buat / Edit Laporan Hasil Mediasi
                         </a>
                         @if ($laporanLengkap)
                             @if ($golId >= 9)
@@ -339,12 +352,9 @@
                                     </form>
                                 @endif
                             @else
-                                <form action="{{ route('perceraian.rekomendasi-opd', $perceraian) }}" method="POST" style="display:inline" id="formRekomendasiOpd">
-                                    @csrf
-                                    <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiRekomendasi()">
-                                        <i class="bx bx-receipt"></i> Rekomendasi ke OPD Asal
-                                    </button>
-                                </form>
+                                <a href="{{ route('perceraian.rekomendasi-opd.form', $perceraian) }}" class="btn btn-sm btn-warning">
+                                    <i class="bx bx-receipt"></i> Rekomendasi ke OPD Asal
+                                </a>
                             @endif
                             @role('walikota')
                             <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-sm btn-danger">
@@ -354,6 +364,7 @@
                         @endif
                     </div>
                 </div>
+                @endif
 
                 {{-- Log TMS --}}
                 @if ($perceraian->logTms->isNotEmpty())
@@ -381,7 +392,6 @@
                         <i class="bx bx-file"></i> Buat SK
                     </a>
                     @endrole --}}
-                    @can('admin')
                     <div class="d-flex gap-1 ms-auto" id="msTmsButtons">
                         <button type="button" class="btn btn-sm {{ $perceraian->ms_tms === 1 ? 'btn-success' : 'btn-outline-success' }}"
                                 onclick="updateMsTms({{ $perceraian->id }}, 1)" id="btnMs_{{ $perceraian->id }}">
@@ -397,7 +407,7 @@
                     @if ($perceraian->status_izin_perceraian_id == 1 || is_null($perceraian->status_izin_perceraian_id))
                     <form id="formAjukan" action="{{ route('perceraian.ajukan', $perceraian) }}" method="POST">
                         @csrf
-                        <button type="button" class="btn btn-success" onclick="cekDokumenWajib()">
+                        <button type="button" class="btn btn-success mt-3" onclick="cekDokumenWajib()">
                             <i class="bx bx-send"></i> Ajukan Izin
                         </button>
                     </form>

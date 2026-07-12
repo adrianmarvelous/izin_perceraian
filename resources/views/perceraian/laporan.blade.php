@@ -228,9 +228,12 @@
                         <i class="bx bx-save"></i> Simpan Laporan
                     </button>
 
-                    <button onclick="window.print()" class="btn btn-primary">
-                        <i class="bx bx-printer"></i> Cetak / PDF
-                    </button>
+                    <a href="{{ route('perceraian.laporan.pdf', $perceraian) }}" target="_blank" class="btn btn-primary">
+                        <i class="bx bx-file-pdf"></i> Download PDF
+                    </a>
+                    {{-- <button onclick="window.print()" class="btn btn-info">
+                        <i class="bx bx-printer"></i> Cetak Browser
+                    </button> --}}
                     <a href="{{ route('perceraian.dokumen', $perceraian) }}" class="btn btn-outline-secondary">Kembali</a>
                 </div>
             </div>

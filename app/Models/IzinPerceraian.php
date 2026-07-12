@@ -27,6 +27,7 @@ class IzinPerceraian extends Model
         'laporan_analisis',
         'laporan_kesimpulan',
         'laporan_saran',
+        'rekomendasi_opd',
         'created_by',
     ];
 

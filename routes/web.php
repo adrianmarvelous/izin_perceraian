@@ -27,6 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::middleware('can:admin')->group(function () {
         Route::resource('master-opd', App\Http\Controllers\MasterOpdController::class);
         Route::resource('master-unit-kerja', App\Http\Controllers\MasterUnitKerjaController::class);
+
+        // Statistik Izin Perceraian
+        Route::get('/statistik-perceraian', [App\Http\Controllers\PerceraianController::class, 'statistik'])->name('statistik');
+        Route::get('/statistik-perceraian/pdf', [App\Http\Controllers\PerceraianController::class, 'statistikPdf'])->name('statistik.pdf');
     });
 
     // Izin Perceraian
@@ -54,6 +58,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/{perceraian}/berita-acara/{pihak}/pdf', [App\Http\Controllers\PerceraianController::class, 'beritaAcaraPdf'])->name('berita-acara.pdf');
         Route::post('/{perceraian}/teruskan-walikota', [App\Http\Controllers\PerceraianController::class, 'teruskanWalikota'])->name('teruskan-walikota');
         Route::post('/{perceraian}/rekomendasi-opd', [App\Http\Controllers\PerceraianController::class, 'rekomendasiOpd'])->name('rekomendasi-opd');
+        Route::get('/{perceraian}/rekomendasi-opd/form', [App\Http\Controllers\PerceraianController::class, 'rekomendasiOpdForm'])->name('rekomendasi-opd.form');
+        Route::post('/{perceraian}/rekomendasi-opd/simpan', [App\Http\Controllers\PerceraianController::class, 'simpanRekomendasiOpd'])->name('rekomendasi-opd.simpan');
+        Route::get('/{perceraian}/rekomendasi-opd/pdf', [App\Http\Controllers\PerceraianController::class, 'rekomendasiOpdPdf'])->name('rekomendasi-opd.pdf');
         Route::get('/{perceraian}/sk', [App\Http\Controllers\PerceraianController::class, 'skWalikota'])->name('sk');
     });
 });

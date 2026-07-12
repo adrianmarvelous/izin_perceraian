@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="row">
-    <div class="col-12 col-lg-8">
+    <div class="col-12">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">{{ $isEdit ? 'Edit' : 'Buat' }} Berita Acara {{ ucfirst($pihak) }}</h5>

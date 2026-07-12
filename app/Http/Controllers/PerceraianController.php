@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\DokumenPerceraian;
 use App\Models\IzinPerceraian;
 use App\Models\Pegawai;
+use App\Models\StatusIzinPerceraian;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -17,14 +19,21 @@ class PerceraianController extends Controller
         $user = Auth::user();
 
         if ($user->hasRole('admin')) {
-            $data = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
+            $dataAktif = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
                 ->where('status_izin_perceraian_id', 2)
                 ->latest()->get();
+            $history = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
+                ->latest()->get();
+            $data = $dataAktif;
         } elseif ($user->hasRole('walikota')) {
+            $dataAktif = collect();
+            $history = collect();
             $data = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
                 ->where('status_izin_perceraian_id', 4)
                 ->latest()->get();
         } else {
+            $dataAktif = collect();
+            $history = collect();
             // OPD hanya lihat pengajuan dari pegawai di OPD-nya
             $pegawaiIds = Pegawai::where('opd', $user->name)->pluck('id');
             $data = IzinPerceraian::with('pegawai', 'creator', 'statusIzin')
@@ -33,7 +42,82 @@ class PerceraianController extends Controller
                 ->latest()->get();
         }
 
-        return view('perceraian.index', compact('data'));
+        return view('perceraian.index', compact('data', 'dataAktif', 'history'));
+    }
+
+    // Statistik Izin Perceraian
+    public function statistik(Request $request)
+    {
+        $bulanAwal = $request->input('bulan_awal', now()->startOfYear()->format('Y-m'));
+        $bulanAkhir = $request->input('bulan_akhir', now()->endOfYear()->format('Y-m'));
+
+        $startDate = Carbon::parse($bulanAwal)->startOfMonth();
+        $endDate = Carbon::parse($bulanAkhir)->endOfMonth();
+
+        // Semua data dalam periode
+        $semuaData = IzinPerceraian::with('pegawai', 'statusIzin')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->latest()
+            ->get();
+
+        // Count per status
+        $statuses = StatusIzinPerceraian::orderBy('id')->get();
+        $countPerStatus = [];
+        foreach ($statuses as $s) {
+            $countPerStatus[$s->id] = [
+                'nama' => $s->nama,
+                'total' => $semuaData->where('status_izin_perceraian_id', $s->id)->count(),
+            ];
+        }
+        // Data tanpa status (null)
+        $countPerStatus[0] = [
+            'nama' => 'Tanpa Status',
+            'total' => $semuaData->whereNull('status_izin_perceraian_id')->count(),
+        ];
+
+        $totalKeseluruhan = $semuaData->count();
+
+        return view('perceraian.statistik', compact(
+            'semuaData', 'statuses', 'countPerStatus', 'totalKeseluruhan',
+            'bulanAwal', 'bulanAkhir'
+        ));
+    }
+
+    // PDF Statistik Izin Perceraian
+    public function statistikPdf(Request $request)
+    {
+        $bulanAwal = $request->input('bulan_awal', now()->startOfYear()->format('Y-m'));
+        $bulanAkhir = $request->input('bulan_akhir', now()->endOfYear()->format('Y-m'));
+
+        $startDate = Carbon::parse($bulanAwal)->startOfMonth();
+        $endDate = Carbon::parse($bulanAkhir)->endOfMonth();
+
+        $semuaData = IzinPerceraian::with('pegawai', 'statusIzin')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->latest()
+            ->get();
+
+        $statuses = StatusIzinPerceraian::orderBy('id')->get();
+        $countPerStatus = [];
+        foreach ($statuses as $s) {
+            $countPerStatus[$s->id] = [
+                'nama' => $s->nama,
+                'total' => $semuaData->where('status_izin_perceraian_id', $s->id)->count(),
+            ];
+        }
+        $countPerStatus[0] = [
+            'nama' => 'Tanpa Status',
+            'total' => $semuaData->whereNull('status_izin_perceraian_id')->count(),
+        ];
+
+        $totalKeseluruhan = $semuaData->count();
+
+        $pdf = Pdf::loadView('perceraian.statistik_pdf', compact(
+            'statuses', 'countPerStatus', 'totalKeseluruhan',
+            'bulanAwal', 'bulanAkhir', 'startDate', 'endDate'
+        ));
+        $pdf->setPaper('A4', 'landscape');
+        return $pdf->stream('statistik_perceraian_' . $bulanAwal . '_' . $bulanAkhir . '.pdf');
     }
 
     public function create()
@@ -88,6 +172,13 @@ class PerceraianController extends Controller
             ['kode' => 'dokumentasi',   'nama_dokumen' => 'Dokumentasi (link Google Drive)', 'wajib' => true],
             ['kode' => 'surat_pernyataan', 'nama_dokumen' => 'Surat Pernyataan yang ditandatangani oleh yang bersangkutan, RT/RW, Lurah, dan Camat domisili yang bersangkutan (BILA DIPERLUKAN)', 'wajib' => false, 'kondisi_wajib' => 'pisah_rumah>=2_tahun'],
             ['kode' => 'bukti_lain',    'nama_dokumen' => 'Bukti (misal perselingkuhan dll)', 'wajib' => false],
+
+            // Dokumen khusus Admin
+            ['kode' => 'admin_surat_panggilan',     'nama_dokumen' => 'Surat Panggilan', 'wajib' => false],
+            ['kode' => 'admin_ba_penggugat',        'nama_dokumen' => 'Berita Acara Mediasi Penggugat', 'wajib' => false],
+            ['kode' => 'admin_ba_tergugat',         'nama_dokumen' => 'Berita Acara Mediasi Tergugat', 'wajib' => false],
+            ['kode' => 'admin_laporan_mediasi',     'nama_dokumen' => 'Laporan Hasil Mediasi', 'wajib' => false],
+            ['kode' => 'admin_rekomendasi_opd',     'nama_dokumen' => 'Rekomendasi ke OPD', 'wajib' => false],
         ];
 
         foreach ($dokumen as $d) {
@@ -138,7 +229,7 @@ class PerceraianController extends Controller
         }
 
         $perceraian->update($validated);
-        return redirect()->route('perceraian.index')->with('success', 'Data berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Data berhasil diperbarui.');
     }
 
     public function destroy(IzinPerceraian $perceraian)
@@ -302,7 +393,7 @@ class PerceraianController extends Controller
         $pdf = Pdf::loadView('perceraian.surat_panggilan', compact('perceraian'));
         $pdf->setPaper('A4');
 
-        $filename = "surat_panggilan_{$pihak}_{$perceraian->id}.pdf";
+        $filename = "surat_panggilan_{$perceraian->id}.pdf";
         return $pdf->stream($filename);
     }
 
@@ -328,7 +419,7 @@ class PerceraianController extends Controller
 
         $perceraian->update($validated);
 
-        return redirect()->route('perceraian.laporan', $perceraian)
+        return redirect()->route('perceraian.dokumen', $perceraian)
             ->with('success', 'Konten laporan berhasil disimpan.');
     }
 
@@ -519,6 +610,38 @@ class PerceraianController extends Controller
 
         return redirect()->route('perceraian.dokumen', $perceraian)
             ->with('success', 'Rekomendasi berhasil dikirim ke OPD Asal.');
+    }
+
+    // Halaman form Rekomendasi ke OPD
+    public function rekomendasiOpdForm(IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+        $perceraian->load('pegawai.golongan');
+        return view('perceraian.rekomendasi_opd', compact('perceraian'));
+    }
+
+    // Simpan konten Rekomendasi ke OPD + ubah status
+    public function simpanRekomendasiOpd(Request $request, IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+
+        $perceraian->update([
+            'status_izin_perceraian_id' => 3,
+        ]);
+
+        return redirect()->route('perceraian.dokumen', $perceraian)
+            ->with('success', 'Rekomendasi berhasil dikirim ke OPD Asal.');
+    }
+
+    // PDF Rekomendasi ke OPD
+    public function rekomendasiOpdPdf(IzinPerceraian $perceraian)
+    {
+        $this->authorizeAccess($perceraian);
+        $perceraian->load('pegawai.golongan');
+
+        $pdf = Pdf::loadView('perceraian.rekomendasi_opd_pdf', compact('perceraian'));
+        $pdf->setPaper('A4');
+        return $pdf->stream('rekomendasi_opd_' . $perceraian->id . '.pdf');
     }
 
     public function skWalikota(IzinPerceraian $perceraian)

@@ -158,6 +158,13 @@
                             <div data-i18n="Users">Users</div>
                         </a>
                     </li>
+                    <!-- Statistik -->
+                    <li class="menu-item {{ request()->routeIs('statistik') ? 'active' : '' }}">
+                        <a href="{{ route('statistik') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+                            <div data-i18n="Statistik Izin Perceraian">Statistik Izin Perceraian</div>
+                        </a>
+                    </li>
                     @endcan
                 </ul>
             </aside>
