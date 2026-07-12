@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Golongan;
 use App\Models\MasterOpd;
 use App\Models\MasterUnitKerja;
 use App\Models\Pegawai;
@@ -42,7 +43,8 @@ class PegawaiController extends Controller
     public function create()
     {
         $opdList = MasterOpd::orderBy('nama_opd')->get();
-        return view('pegawai.create', compact('opdList'));
+        $golonganList = Golongan::orderBy('gol_ruang')->get();
+        return view('pegawai.create', compact('opdList', 'golonganList'));
     }
 
     /**
@@ -66,6 +68,7 @@ class PegawaiController extends Controller
             'jabatan'         => ['nullable', 'string', 'max:255'],
             'kode_unit'       => ['nullable', 'string', 'max:50'],
             'unit_kerja'      => ['nullable', 'string', 'max:255'],
+            'id_gol'          => ['nullable', 'exists:golongan,id'],
             'opd'             => [$user->hasRole('admin') ? 'required' : 'nullable', 'string', 'max:255'],
             'status_menikah'  => ['nullable', 'string', 'max:50'],
             'nama_pasangan'   => ['nullable', 'string', 'max:255'],
@@ -90,7 +93,8 @@ class PegawaiController extends Controller
     {
         $this->authorizeAccess($pegawai);
         $opdList = MasterOpd::orderBy('nama_opd')->get();
-        return view('pegawai.edit', compact('pegawai', 'opdList'));
+        $golonganList = Golongan::orderBy('gol_ruang')->get();
+        return view('pegawai.edit', compact('pegawai', 'opdList', 'golonganList'));
     }
 
     /**
@@ -116,6 +120,7 @@ class PegawaiController extends Controller
             'jabatan'         => ['nullable', 'string', 'max:255'],
             'kode_unit'       => ['nullable', 'string', 'max:50'],
             'unit_kerja'      => ['nullable', 'string', 'max:255'],
+            'id_gol'          => ['nullable', 'exists:golongan,id'],
             'opd'             => [$user->hasRole('admin') ? 'required' : 'nullable', 'string', 'max:255'],
             'status_menikah'  => ['nullable', 'string', 'max:50'],
             'nama_pasangan'   => ['nullable', 'string', 'max:255'],

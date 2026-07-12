@@ -322,38 +322,38 @@
                         && $perceraian->laporan_saran;
                     $golId = $perceraian->pegawai->id_gol ?? 0;
                 @endphp
-                @if ($laporanLengkap)
                 <div class="mt-3 p-3 border rounded">
                     <label class="form-label fw-bold mb-2">Laporan &amp; Tindak Lanjut</label>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
                         <a href="{{ route('perceraian.laporan', $perceraian) }}" class="btn btn-sm btn-info">
                             <i class="bx bx-notepad"></i> Buat / Edit Laporan
                         </a>
-                        @if ($golId >= 9)
-                            @if($perceraian->status_izin_perceraian_id == 2)
-                                <form action="{{ route('perceraian.teruskan-walikota', $perceraian) }}" method="POST" style="display:inline" id="formTeruskanWalikota">
+                        @if ($laporanLengkap)
+                            @if ($golId >= 9)
+                                @if($perceraian->status_izin_perceraian_id == 2)
+                                    <form action="{{ route('perceraian.teruskan-walikota', $perceraian) }}" method="POST" style="display:inline" id="formTeruskanWalikota">
+                                        @csrf
+                                        <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiTeruskan()">
+                                            <i class="bx bx-send"></i> Teruskan ke Walikota
+                                        </button>
+                                    </form>
+                                @endif
+                            @else
+                                <form action="{{ route('perceraian.rekomendasi-opd', $perceraian) }}" method="POST" style="display:inline" id="formRekomendasiOpd">
                                     @csrf
-                                    <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiTeruskan()">
-                                        <i class="bx bx-send"></i> Teruskan ke Walikota
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiRekomendasi()">
+                                        <i class="bx bx-receipt"></i> Rekomendasi ke OPD Asal
                                     </button>
                                 </form>
                             @endif
-                        @else
-                            <form action="{{ route('perceraian.rekomendasi-opd', $perceraian) }}" method="POST" style="display:inline" id="formRekomendasiOpd">
-                                @csrf
-                                <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiRekomendasi()">
-                                    <i class="bx bx-receipt"></i> Rekomendasi ke OPD Asal
-                                </button>
-                            </form>
+                            @role('walikota')
+                            <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-sm btn-danger">
+                                <i class="bx bx-file"></i> Buat SK
+                            </a>
+                            @endrole
                         @endif
-                        @role('walikota')
-                        <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-sm btn-danger">
-                            <i class="bx bx-file"></i> Buat SK
-                        </a>
-                        @endrole
                     </div>
                 </div>
-                @endif
 
                 {{-- Log TMS --}}
                 @if ($perceraian->logTms->isNotEmpty())

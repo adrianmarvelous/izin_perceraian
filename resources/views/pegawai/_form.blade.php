@@ -90,6 +90,21 @@
         @error('jabatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Golongan -->
+    <div class="col-md-3">
+        <label for="id_gol" class="form-label">Golongan</label>
+        <select class="form-select @error('id_gol') is-invalid @enderror" id="id_gol" name="id_gol">
+            <option value="">-- Pilih Golongan --</option>
+            @foreach ($golonganList as $g)
+                <option value="{{ $g->id }}"
+                    {{ old('id_gol', $pegawai->id_gol ?? '') == $g->id ? 'selected' : '' }}>
+                    {{ $g->gol_ruang }} - {{ $g->pangkat }}
+                </option>
+            @endforeach
+        </select>
+        @error('id_gol')<div class="invalid-feedback">{{ $message }}</div>@enderror
+    </div>
+
     <!-- OPD -->
     <div class="col-md-4">
         <label for="opd" class="form-label">OPD <span class="text-danger">*</span></label>
