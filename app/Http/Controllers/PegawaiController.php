@@ -24,7 +24,7 @@ class PegawaiController extends Controller
 
         // Admin bisa lihat semua, OPD hanya lihat pegawai sesuai OPD-nya
         if ($user?->hasRole('admin')) {
-            $query = Pegawai::with('golongan')->query();
+            $query = Pegawai::with('golongan');
             if ($request->filled('opd')) {
                 $query->where('opd', $request->opd);
             }
