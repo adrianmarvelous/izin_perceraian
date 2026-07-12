@@ -115,6 +115,12 @@
                                     <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingCount }}</span>
                                 @endif
                             @endcan
+                            @role('walikota')
+                                @php $walikotaCount = \App\Models\IzinPerceraian::where('status_izin_perceraian_id', 4)->count(); @endphp
+                                @if ($walikotaCount > 0)
+                                    <span class="badge bg-primary rounded-pill ms-auto">{{ $walikotaCount }}</span>
+                                @endif
+                            @endrole
                         </a>
                     </li>
 
