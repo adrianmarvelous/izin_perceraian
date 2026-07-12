@@ -24,7 +24,10 @@ class StatusIzinPerceraianSeeder extends Seeder
         ];
 
         foreach ($statuses as $status) {
-            StatusIzinPerceraian::create($status);
+            StatusIzinPerceraian::updateOrCreate(
+                ['id' => $status['id']],
+                $status
+            );
         }
     }
 }

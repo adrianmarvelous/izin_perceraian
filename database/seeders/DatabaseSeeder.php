@@ -19,18 +19,16 @@ class DatabaseSeeder extends Seeder
         $this->call(WalikotaRoleSeeder::class);
         $this->call(WalikotaUserSeeder::class);
 
-        $user = User::factory()->create([
-            'name' => 'Admin',
-            'username' => 'admin',
-            'email' => 'admin@example.com',
-        ]);
+        $user = User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            ['name' => 'Admin', 'username' => 'admin', 'password' => bcrypt('password')]
+        );
         $user->assignRole('admin');
 
-        $user2 = User::factory()->create([
-            'name' => 'User',
-            'username' => 'user',
-            'email' => 'user@example.com',
-        ]);
+        $user2 = User::updateOrCreate(
+            ['email' => 'user@example.com'],
+            ['name' => 'User', 'username' => 'user', 'password' => bcrypt('password')]
+        );
         $user2->assignRole('user');
 
         $this->call(OPDSeeder::class);
