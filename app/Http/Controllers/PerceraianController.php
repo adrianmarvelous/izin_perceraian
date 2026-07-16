@@ -650,6 +650,40 @@ class PerceraianController extends Controller
         return view('perceraian.sk_walikota', compact('perceraian'));
     }
 
+    public function simpanSk(IzinPerceraian $perceraian)
+    {
+        $perceraian->update([
+            'status_izin_perceraian_id' => 5,
+        ]);
+
+        return redirect()->route('perceraian.dokumen', $perceraian)
+            ->with('success', 'SK Walikota berhasil diterbitkan.');
+    }
+
+    public function skPdf(IzinPerceraian $perceraian)
+    {
+        $perceraian->load('pegawai.golongan');
+
+        $pdf = Pdf::loadView('perceraian.sk_walikota_pdf', compact('perceraian'));
+        $pdf->setPaper('A4');
+        return $pdf->stream('sk_walikota_' . $perceraian->id . '.pdf');
+    }
+
+    public function tolakSk(Request $request, IzinPerceraian $perceraian)
+    {
+        $validated = $request->validate([
+            'alasan' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $perceraian->update([
+            'status_izin_perceraian_id' => 6,
+            'catatan' => 'Ditolak oleh Walikota: ' . $validated['alasan'],
+        ]);
+
+        return redirect()->route('perceraian.dokumen', $perceraian)
+            ->with('success', 'Pengajuan ditolak.');
+    }
+
     private function authorizeAccess(IzinPerceraian $perceraian): void
     {
         $user = Auth::user();

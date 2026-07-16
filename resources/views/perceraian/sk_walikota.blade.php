@@ -26,29 +26,14 @@
         color: #000;
         padding: 30px 40px;
     }
-    .sk-body .kop {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .sk-body .kop img {
-        width: 90px;
+    .sk-body table.kop {
+        border-collapse: collapse;
+        width: 100%;
         margin-bottom: 5px;
     }
-    .sk-body .kop h4 {
-        font-size: 16pt;
-        font-weight: bold;
-        margin: 2px 0;
-        text-transform: uppercase;
-    }
-    .sk-body .kop h5 {
-        font-size: 13pt;
-        font-weight: bold;
-        margin: 2px 0;
-        text-transform: uppercase;
-    }
-    .sk-body .kop p {
-        font-size: 9pt;
-        margin: 1px 0;
+    .sk-body table.kop td {
+        padding: 2px 5px;
+        vertical-align: top;
     }
     .sk-body .hr-garis { border: none; border-top: 3px solid #000; margin: 4px 0; }
     .sk-body .hr-garis2 { border: none; border-top: 1px solid #000; margin: 0 0 20px 0; }
@@ -176,9 +161,16 @@
         <div class="card">
             <div class="card-body sk-body">
                 {{-- Kop --}}
-                <div class="kop">
-                    <img src="{{ asset('img/logo  garuda.png') }}" alt="Logo">
-                </div>
+                <table class="kop" style="text-align:center;">
+                    <tr>
+                        <td rowspan="5" style="width:15%;"><img src="{{ asset('img/logo pemerintah kota mojokerto.png') }}" width="80" alt=""></td>
+                        <td style="font-size:18px;font-weight:bold;">WALI KOTA MOJOKERTO</td>
+                    </tr>
+                    <tr><td style="font-size:8pt;">Jalan Bhayangkara No.42, Kecamatan Kranggan, Kota Mojokerto, 61313</td></tr>
+                    <tr><td style="font-size:8pt;">Telepon (0321) 399600, Faksimile (0321) 399600</td></tr>
+                </table>
+                <hr class="hr-garis">
+                <hr class="hr-garis2">
 
                 {{-- Judul --}}
                 <div class="judul">KEPUTUSAN</div>
@@ -316,9 +308,15 @@
 
             <div class="card-footer no-print">
                 <div class="d-flex gap-2">
-                    <button onclick="window.print()" class="btn btn-primary">
-                        <i class="bx bx-printer"></i> Cetak / PDF
-                    </button>
+                    <form action="{{ route('perceraian.sk.simpan', $perceraian) }}" method="POST" style="display:inline">
+                        @csrf
+                        <button type="submit" class="btn btn-success" onclick="return confirm('Terbitkan SK Walikota ini? Status akan berubah menjadi Rekomendasi dari Walikota.')">
+                            <i class="bx bx-check"></i> Simpan &amp; Terbitkan
+                        </button>
+                    </form>
+                    <a href="{{ route('perceraian.sk.pdf', $perceraian) }}" class="btn btn-primary">
+                        <i class="bx bx-printer"></i> Print PDF
+                    </a>
                     <a href="{{ route('perceraian.dokumen', $perceraian) }}" class="btn btn-outline-secondary">Kembali</a>
                 </div>
             </div>

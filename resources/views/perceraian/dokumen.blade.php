@@ -25,6 +25,7 @@
                             3 => 'bg-label-info',
                             4 => 'bg-label-primary',
                             5 => 'bg-label-success',
+                            6 => 'bg-label-danger',
                         ];
                         $statusBadge = $colors[$perceraian->status_izin_perceraian_id] ?? 'bg-label-secondary';
                     @endphp
@@ -39,6 +40,13 @@
                         </a>
                     @endif
                 </div>
+
+                @if ($perceraian->status_izin_perceraian_id == 6 && $perceraian->catatan)
+                <div class="alert alert-danger mt-2 mb-0">
+                    <strong><i class="bx bx-x-circle"></i> Alasan Ditolak:</strong><br>
+                    {{ $perceraian->catatan }}
+                </div>
+                @endif
 
                 {{-- Timeline Status --}}
                 @php
@@ -325,7 +333,8 @@
 
                     @endif
                 </form>
-
+                @endif
+                @endcan
 
                 {{-- Laporan & Aksi --}}
                 @php
@@ -335,33 +344,56 @@
                         && $perceraian->laporan_saran;
                     $golId = $perceraian->pegawai->id_gol ?? 0;
                 @endphp
+                @if ($laporanLengkap || auth()->user()->hasRole('walikota'))
                 <div class="mt-3 p-3 border rounded">
                     <label class="form-label fw-bold mb-2">Laporan &amp; Tindak Lanjut</label>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
+                        @can('admin')
                         <a href="{{ route('perceraian.laporan', $perceraian) }}" class="btn btn-sm btn-info">
                             <i class="bx bx-notepad"></i> Buat / Edit Laporan Hasil Mediasi
                         </a>
-                        @if ($laporanLengkap)
-                            @if ($golId >= 9)
-                                @if($perceraian->status_izin_perceraian_id == 2)
-                                    <form action="{{ route('perceraian.teruskan-walikota', $perceraian) }}" method="POST" style="display:inline" id="formTeruskanWalikota">
-                                        @csrf
-                                        <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiTeruskan()">
-                                            <i class="bx bx-send"></i> Teruskan ke Walikota
-                                        </button>
-                                    </form>
+                            @if ($laporanLengkap)
+                                @if ($golId >= 9)
+                                    @if($perceraian->status_izin_perceraian_id == 2)
+                                        <form action="{{ route('perceraian.teruskan-walikota', $perceraian) }}" method="POST" style="display:inline" id="formTeruskanWalikota">
+                                            @csrf
+                                            <button type="button" class="btn btn-sm btn-warning" onclick="konfirmasiTeruskan()">
+                                                <i class="bx bx-send"></i> Teruskan ke Walikota
+                                            </button>
+                                        </form>
+                                    @endif
+                                @else
+                                    <a href="{{ route('perceraian.rekomendasi-opd.form', $perceraian) }}" class="btn btn-sm btn-warning">
+                                        <i class="bx bx-receipt"></i> Rekomendasi ke OPD Asal
+                                    </a>
                                 @endif
-                            @else
-                                <a href="{{ route('perceraian.rekomendasi-opd.form', $perceraian) }}" class="btn btn-sm btn-warning">
-                                    <i class="bx bx-receipt"></i> Rekomendasi ke OPD Asal
-                                </a>
                             @endif
-                            @role('walikota')
-                            <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-sm btn-danger">
-                                <i class="bx bx-file"></i> Buat SK
-                            </a>
-                            @endrole
-                        @endif
+                        @endcan
+                        @role('walikota')
+                        <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-sm btn-primary">
+                            <i class="bx bx-file"></i> Buat SK
+                        </a>
+                        <form action="{{ route('perceraian.tolak-sk', $perceraian) }}" method="POST" style="display:inline" id="formTolakSk">
+                            @csrf
+                            <input type="hidden" name="alasan" id="alasanTolak">
+                        </form>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="konfirmasiTolak()">
+                            <i class="bx bx-x-circle"></i> Tolak
+                        </button>
+                        @endrole
+                    </div>
+                </div>
+                @endif
+
+                {{-- SK Walikota (tampil jika sudah terbit) --}}
+                @if ($perceraian->status_izin_perceraian_id == 5)
+                <div class="mt-3 p-3 border rounded">
+                    <label class="form-label fw-bold mb-2">SK Wali Kota</label>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <a href="{{ route('perceraian.sk.pdf', $perceraian) }}" class="btn btn-sm btn-primary">
+                            <i class="bx bx-file"></i> Lihat SK Wali Kota
+                        </a>
+                        <span class="text-muted small">Status: <span class="badge bg-label-success">Rekomendasi dari Walikota</span></span>
                     </div>
                 </div>
                 @endif
@@ -387,11 +419,7 @@
                     <a href="{{ route('perceraian.index') }}" class="btn btn-outline-secondary">
                         <i class="bx bx-arrow-back"></i> Kembali
                     </a>
-                    {{-- @role('walikota')
-                    <a href="{{ route('perceraian.sk', $perceraian) }}" class="btn btn-danger">
-                        <i class="bx bx-file"></i> Buat SK
-                    </a>
-                    @endrole --}}
+                    @can('admin')
                     <div class="d-flex gap-1 ms-auto" id="msTmsButtons">
                         <button type="button" class="btn btn-sm {{ $perceraian->ms_tms === 1 ? 'btn-success' : 'btn-outline-success' }}"
                                 onclick="updateMsTms({{ $perceraian->id }}, 1)" id="btnMs_{{ $perceraian->id }}">
@@ -712,6 +740,38 @@ function konfirmasiRekomendasi() {
     }).then((result) => {
         if (result.isConfirmed) {
             document.getElementById('formRekomendasiOpd').submit();
+        }
+    });
+}
+
+// Konfirmasi SweetAlert untuk Tolak SK oleh Walikota
+function konfirmasiTolak() {
+    Swal.fire({
+        title: 'Tolak Pengajuan?',
+        text: 'Pengajuan ini akan ditolak.',
+        icon: 'warning',
+        input: 'textarea',
+        inputLabel: 'Alasan Penolakan',
+        inputPlaceholder: 'Tuliskan alasan penolakan...',
+        inputAttributes: {
+            required: true,
+            maxlength: 1000,
+        },
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#697a8d',
+        confirmButtonText: 'Ya, Tolak!',
+        cancelButtonText: 'Batal',
+        preConfirm: (alasan) => {
+            if (!alasan) {
+                Swal.showValidationMessage('Alasan penolakan wajib diisi');
+            }
+            return alasan;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('alasanTolak').value = result.value;
+            document.getElementById('formTolakSk').submit();
         }
     });
 }

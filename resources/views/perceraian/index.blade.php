@@ -118,10 +118,9 @@
                                                             </button>
                                                         </form>
                                                         @endif
-                                                        <form action="{{ route('perceraian.destroy', $d) }}" method="POST"
-                                                              onsubmit="return confirm('Yakin hapus?')">
+                                                        <form action="{{ route('perceraian.destroy', $d) }}" method="POST" style="display:inline" class="form-hapus">
                                                             @csrf @method('DELETE')
-                                                            <button type="submit" class="dropdown-item">
+                                                            <button type="button" class="dropdown-item" onclick="konfirmasiHapus(this)">
                                                                 <i class="bx bx-trash me-1"></i> Hapus
                                                             </button>
                                                         </form>
@@ -204,10 +203,9 @@
                                                             </button>
                                                         </form>
                                                         @endif
-                                                        <form action="{{ route('perceraian.destroy', $d) }}" method="POST"
-                                                              onsubmit="return confirm('Yakin hapus?')">
+                                                        <form action="{{ route('perceraian.destroy', $d) }}" method="POST" style="display:inline" class="form-hapus">
                                                             @csrf @method('DELETE')
-                                                            <button type="submit" class="dropdown-item">
+                                                            <button type="button" class="dropdown-item" onclick="konfirmasiHapus(this)">
                                                                 <i class="bx bx-trash me-1"></i> Hapus
                                                             </button>
                                                         </form>
@@ -254,5 +252,23 @@ $(function () {
         $(this).closest('.table-responsive').css('overflow', '');
     });
 });
+
+// Konfirmasi Hapus dengan SweetAlert
+function konfirmasiHapus(btn) {
+    Swal.fire({
+        title: 'Yakin hapus?',
+        text: 'Data yang dihapus tidak dapat dikembalikan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#697a8d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $(btn).closest('form.form-hapus').submit();
+        }
+    });
+}
 </script>
 @endpush

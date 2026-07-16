@@ -21,6 +21,7 @@ class StatusIzinPerceraianSeeder extends Seeder
             ['id' => 3, 'nama' => 'Rekomendasi dari BKPSDM', 'deskripsi' => 'BKPSDM telah memberikan rekomendasi'],
             ['id' => 4, 'nama' => 'Pengajuan ke Walikota', 'deskripsi' => 'Pengajuan izin perceraian telah dikirim ke Walikota'],
             ['id' => 5, 'nama' => 'Rekomendasi dari Walikota', 'deskripsi' => 'Walikota telah memberikan rekomendasi akhir'],
+            ['id' => 6, 'nama' => 'Ditolak', 'deskripsi' => 'Pengajuan izin perceraian ditolak oleh Walikota'],
         ];
 
         foreach ($statuses as $status) {
