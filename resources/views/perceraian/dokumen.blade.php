@@ -344,7 +344,7 @@
                         && $perceraian->laporan_saran;
                     $golId = $perceraian->pegawai->id_gol ?? 0;
                 @endphp
-                @if ($laporanLengkap || auth()->user()->hasRole('walikota'))
+                @if ($laporanLengkap || auth()->user()->hasRole('admin'))
                 <div class="mt-3 p-3 border rounded">
                     <label class="form-label fw-bold mb-2">Laporan &amp; Tindak Lanjut</label>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
@@ -416,7 +416,7 @@
                 @endif
 
                 <div class="mt-4 d-flex gap-2 align-items-center">
-                    <a href="{{ route('perceraian.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('perceraian.index') }}" class="btn btn-outline-secondary mt-3">
                         <i class="bx bx-arrow-back"></i> Kembali
                     </a>
                     @can('admin')
