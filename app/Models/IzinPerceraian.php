@@ -28,6 +28,13 @@ class IzinPerceraian extends Model
         'laporan_kesimpulan',
         'laporan_saran',
         'rekomendasi_opd',
+        'sk_membaca',
+        'sk_menimbang',
+        'sk_mengingat',
+        'sk_memperhatikan',
+        'sk_pertama',
+        'sk_kedua',
+        'sk_ketiga',
         'created_by',
     ];
 

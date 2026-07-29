@@ -61,7 +61,7 @@
                             1 => ['label' => 'Draft', 'color' => 'secondary'],
                             2 => ['label' => 'Pengajuan ke BKPSDM', 'color' => 'warning'],
                             4 => ['label' => 'Pengajuan ke Walikota', 'color' => 'primary'],
-                            5 => ['label' => 'Rekomendasi Walikota', 'color' => 'success'],
+                            5 => ['label' => 'Penerbitan SK Walikota', 'color' => 'success'],
                         ];
                     $currentId = $perceraian->status_izin_perceraian_id;
                     $stageIds = array_keys($stages);

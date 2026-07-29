@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{perceraian}/rekomendasi-opd/pdf', [App\Http\Controllers\PerceraianController::class, 'rekomendasiOpdPdf'])->name('rekomendasi-opd.pdf');
         Route::get('/{perceraian}/sk', [App\Http\Controllers\PerceraianController::class, 'skWalikota'])->name('sk');
         Route::post('/{perceraian}/sk/simpan', [App\Http\Controllers\PerceraianController::class, 'simpanSk'])->name('sk.simpan');
+        Route::post('/{perceraian}/sk/simpan-konten', [App\Http\Controllers\PerceraianController::class, 'simpanSkKonten'])->name('sk.simpan-konten');
         Route::get('/{perceraian}/sk/pdf', [App\Http\Controllers\PerceraianController::class, 'skPdf'])->name('sk.pdf');
         Route::post('/{perceraian}/tolak-sk', [App\Http\Controllers\PerceraianController::class, 'tolakSk'])->name('tolak-sk');
     });

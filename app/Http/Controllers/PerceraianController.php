@@ -660,6 +660,24 @@ class PerceraianController extends Controller
             ->with('success', 'SK Walikota berhasil diterbitkan.');
     }
 
+    public function simpanSkKonten(Request $request, IzinPerceraian $perceraian)
+    {
+        $validated = $request->validate([
+            'sk_membaca' => ['nullable', 'string'],
+            'sk_menimbang' => ['nullable', 'string'],
+            'sk_mengingat' => ['nullable', 'string'],
+            'sk_memperhatikan' => ['nullable', 'string'],
+            'sk_pertama' => ['nullable', 'string'],
+            'sk_kedua' => ['nullable', 'string'],
+            'sk_ketiga' => ['nullable', 'string'],
+        ]);
+
+        $perceraian->update($validated);
+
+        return redirect()->route('perceraian.sk', $perceraian)
+            ->with('success', 'Konten SK Walikota berhasil disimpan.');
+    }
+
     public function skPdf(IzinPerceraian $perceraian)
     {
         $perceraian->load('pegawai.golongan');

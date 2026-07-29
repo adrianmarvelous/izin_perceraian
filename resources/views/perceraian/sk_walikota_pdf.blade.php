@@ -48,33 +48,25 @@
             font-weight: bold;
             font-size: 12pt;
             margin-bottom: 5px;
-            text-decoration: underline;
         }
         .no-surat {
             text-align: center;
-            font-weight: bold;
             font-size: 12pt;
             margin-bottom: 10px;
         }
         .tentang {
             text-align: center;
-            font-weight: bold;
             font-size: 12pt;
             margin-bottom: 15px;
-            text-decoration: underline;
         }
         .rahmat {
             text-align: center;
-            font-style: italic;
-            font-weight: bold;
             font-size: 11pt;
             margin-bottom: 15px;
         }
         .section-title {
-            font-weight: bold;
             margin-top: 10px;
             margin-bottom: 5px;
-            text-decoration: underline;
         }
         .content-table {
             width: 100%;
@@ -98,7 +90,6 @@
         }
         .menimbang p, .mengingat p, .memperhatikan p {
             margin: 2px 0;
-            text-indent: -15px;
             padding-left: 35px;
         }
         .memutuskan {
@@ -106,13 +97,6 @@
             font-weight: bold;
             font-size: 12pt;
             margin: 15px 0;
-        }
-        .isi-keputusan {
-            text-align: justify;
-            margin-left: 20px;
-        }
-        .isi-keputusan p {
-            margin: 3px 0;
         }
         .ttd {
             margin-top: 30px;
@@ -144,118 +128,121 @@
         .page-break {
             page-break-before: always;
         }
+        .no-break {
+            page-break-inside: avoid !important;
+        }
     </style>
 </head>
 <body>
-    {{-- Kop --}}
-    <table class="kop" style="text-align:center;">
+    <div style="text-align:center;">
+        <img src="{{ public_path('img/logo garuda.png') }}" width="80" alt="">
+    </div>
+
+    <table>
         <tr>
-            <td rowspan="5" style="width:15%;"><img src="{{ public_path('img/logo pemerintah kota mojokerto.png') }}" width="80" alt=""></td>
-            <td style="font-size:18px;font-weight:bold;">WALI KOTA MOJOKERTO</td>
+            <td colspan="3">
+                <div class="judul">KEPUTUSAN</div>
+                <div class="sub-judul">WALI KOTA MOJOKERTO</div>
+                <div class="no-surat">NOMOR : {{ $nomorSk }}</div>
+                <div class="tentang">TENTANG<br>PEMBERIAN IZIN PERCERAIAN</div>
+                <div class="rahmat">DENGAN RAHMAT TUHAN YANG MAHA ESA<br>WALI KOTA MOJOKERTO</div>
+            </td>
         </tr>
-        <tr><td style="font-size:8pt;">Jalan Bhayangkara No.42, Kecamatan Kranggan, Kota Mojokerto, 61313</td></tr>
-        <tr><td style="font-size:8pt;">Telepon (0321) 399600, Faksimile (0321) 399600</td></tr>
+        <tr>
+            <td style="vertical-align: top;width:10%">Membaca</td>
+            <td style="vertical-align: top;width:4%">:</td>
+            <td style="vertical-align: top;">
+                <div class="no-break">
+                <p style="margin:0;text-align:justify;">Laporan Hasil Mediasi Nomor: {{ $perceraian->nomor_surat ?? 'R.800.1.10.4/ /417.603.3/2026' }} tanggal {{ $perceraian->created_at ? $perceraian->created_at->locale('id')->translatedFormat('d F Y') : '........................' }} tentang Pertimbangan Izin Perceraian ASN yang diajukan oleh:</p>
+                {{-- Data Pegawai --}}
+                <table class="content-table">
+                    <tr><td class="lbl">1. Nama</td><td>: {{ $pegawai->nama ?? '-' }}</td></tr>
+                    <tr><td>2. NIP</td><td>: {{ $pegawai->nip ?? '-' }}</td></tr>
+                    <tr><td>3. Golongan</td><td>: {{ $golText }}</td></tr>
+                    <tr><td>4. Jabatan</td><td>: {{ $pegawai->jabatan ?? '-' }}</td></tr>
+                    <tr><td>5. Unit Kerja</td><td>: {{ $pegawai->opd ?? '-' }}</td></tr>
+                    <tr><td>6. Agama</td><td>: {{ $pegawai->agama ?? '-' }}</td></tr>
+                </table>
+                <div class="indent" style="margin-top:5px;">
+                    terhadap {{ $sebutanLawan }} dengan identitas sebagai berikut:
+                </div>
+                {{-- Data Pasangan --}}
+                <table class="content-table">
+                    <tr><td class="lbl">1. Nama</td><td>: {{ $namaPasangan }}</td></tr>
+                    <tr><td>2. Pekerjaan</td><td>: {{ $perceraian->pegawai->pekerjaan ?? '-' }}</td></tr>
+                    <tr><td>3. Agama</td><td>: -</td></tr>
+                    <tr><td>4. Alamat</td><td>: -</td></tr>
+                </table>
+                <br>
+                <div style="text-align:justify;">{!! $perceraian->sk_membaca !!}</div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Menimbang</td>
+            <td style="vertical-align: top;">:</td>
+            <td>
+                <div style="text-align:justify;">{!! $perceraian->sk_menimbang !!}</div>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Mengingat</td>
+            <td style="vertical-align: top;">:</td>
+            <td>
+                <div class="no-break">
+                <div style="text-align:justify;">{!! $perceraian->sk_mengingat !!}</div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Memperhatikan</td>
+            <td style="vertical-align: top;">:</td>
+            <td>
+                <div style="text-align:justify;">{!! $perceraian->sk_memperhatikan !!}</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3"><div class="memutuskan">MEMUTUSKAN:</div></td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">PERTAMA</td>
+            <td style="vertical-align: top;">:</td>
+            <td>
+                <p style="margin:0;text-align:justify;">Memberikan Izin kepada:</p>
+                <table class="content-table">
+                    <tr><td class="lbl">1. Nama</td><td>: {{ $pegawai->nama ?? '-' }}</td></tr>
+                    <tr><td>2. NIP</td><td>: {{ $pegawai->nip ?? '-' }}</td></tr>
+                    <tr><td>3. Golongan</td><td>: {{ $golText }}</td></tr>
+                    <tr><td>4. Jabatan</td><td>: {{ $pegawai->jabatan ?? '-' }}</td></tr>
+                    <tr><td>5. Unit Kerja</td><td>: {{ $pegawai->opd ?? '-' }}</td></tr>
+                    <tr><td>6. Agama</td><td>: {{ $pegawai->agama ?? '-' }}</td></tr>
+                </table>
+                <p style="margin:5px 0 0 0;text-align:justify;">Dikabulkan untuk melakukan perceraian dengan {{ $sebutanLawan }}:</p>
+                <table class="content-table">
+                    <tr><td class="lbl">1. Nama</td><td>: {{ $namaPasangan }}</td></tr>
+                    <tr><td>2. Pekerjaan</td><td>: -</td></tr>
+                    <tr><td>3. Agama</td><td>: -</td></tr>
+                    <tr><td>4. Alamat</td><td>: -</td></tr>
+                </table>
+                <br>
+                <div style="text-align:justify;">{!! $perceraian->sk_pertama !!}</div>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">KEDUA</td>
+            <td style="vertical-align: top;">:</td>
+            <td>
+                <div style="text-align:justify;">{!! $perceraian->sk_kedua !!}</div>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">KETIGA</td>
+            <td style="vertical-align: top;">:</td>
+            <td>
+                <div style="text-align:justify;">{!! $perceraian->sk_ketiga !!}</div>
+            </td>
+        </tr>
     </table>
-    <hr class="hr-garis">
-    <hr class="hr-garis2">
-
-    {{-- Judul --}}
-    <div class="judul">KEPUTUSAN</div>
-    <div class="sub-judul">WALI KOTA MOJOKERTO</div>
-    <div class="no-surat">NOMOR : {{ $nomorSk }}</div>
-    <div class="tentang">TENTANG<br>PEMBERIAN IZIN PERCERAIAN</div>
-    <div class="rahmat">DENGAN RAHMAT TUHAN YANG MAHA ESA<br>WALI KOTA MOJOKERTO</div>
-
-    {{-- Membaca --}}
-    <div class="section-title">Membaca</div>
-    <div class="indent">
-        : Laporan Hasil Mediasi Nomor: {{ $perceraian->nomor_surat ?? 'R.800.1.10.4/ /417.603.3/2026' }} tanggal {{ $perceraian->created_at ? $perceraian->created_at->locale('id')->translatedFormat('d F Y') : '........................' }} tentang Pertimbangan Izin Perceraian ASN yang diajukan oleh:
-    </div>
-
-    {{-- Data Pegawai --}}
-    <table class="content-table">
-        <tr><td class="lbl">1. Nama</td><td>: {{ $pegawai->nama ?? '-' }}</td></tr>
-        <tr><td>2. NIP</td><td>: {{ $pegawai->nip ?? '-' }}</td></tr>
-        <tr><td>3. Golongan</td><td>: {{ $golText }}</td></tr>
-        <tr><td>4. Jabatan</td><td>: {{ $pegawai->jabatan ?? '-' }}</td></tr>
-        <tr><td>5. Unit Kerja</td><td>: {{ $pegawai->opd ?? '-' }}</td></tr>
-        <tr><td>6. Agama</td><td>: {{ $pegawai->agama ?? '-' }}</td></tr>
-    </table>
-
-    <div class="indent" style="margin-top:5px;">
-        terhadap {{ $sebutanLawan }} dengan identitas sebagai berikut:
-    </div>
-
-    {{-- Data Pasangan --}}
-    <table class="content-table">
-        <tr><td class="lbl">1. Nama</td><td>: {{ $namaPasangan }}</td></tr>
-        <tr><td>2. Pekerjaan</td><td>: {{ $perceraian->pegawai->pekerjaan ?? '-' }}</td></tr>
-        <tr><td>3. Agama</td><td>: -</td></tr>
-        <tr><td>4. Alamat</td><td>: -</td></tr>
-    </table>
-
-    {{-- Menimbang --}}
-    <div class="section-title" style="margin-top:15px;">Menimbang</div>
-    <div class="menimbang">
-        <p>a. Bahwa alasan-alasan yang dikemukakan oleh {{ $sebutan }}. {{ $pegawai->nama ?? '-' }} untuk melakukan perceraian itu dapat diterima oleh akal sehat dan tidak bertentangan dengan peraturan perundang-undangan yang berlaku;</p>
-        <p>b. Pihak {{ ucfirst($pihakLawan) }} ({{ $namaPasangan }}) dan Pihak {{ $jk === 'L' ? 'Istri' : 'Suami' }} ({{ $pegawai->nama ?? '-' }}) sudah tidak lagi tinggal serumah selama ... (........) Tahun berturut-turut yang dibuktikan dengan surat pernyataan dari Kepala Kelurahan / Kepala Desa yang disahkan oleh Camat;</p>
-        <p>c. Pihak {{ ucfirst($pihakLawan) }} ({{ $namaPasangan }}) tidak memberikan nafkah baik lahir maupun batin;</p>
-        <p>d. Kedua belah pihak telah bersepakat untuk berpisah yang dibuktikan dengan surat pernyataan;</p>
-        <p>e. Atasan langsung yang bersangkutan pada {{ $pegawai->opd ?? '-' }} telah memanggil kedua belah pihak ({{ ucfirst($pihakLawan) }} dan {{ $jk === 'L' ? 'Istri' : 'Suami' }}) untuk dilakukan mediasi, nasihat, dan bimbingan agar hubungan baik terjalin kembali, namun gagal.</p>
-    </div>
-
-    {{-- Mengingat --}}
-    <div class="section-title">Mengingat</div>
-    <div class="mengingat">
-        <p>1. Undang-Undang Nomor 1 Tahun 1974 tentang Perkawinan (Lembaran Negara Republik Indonesia Tahun 1974 Nomor 1, Tambahan Lembaran Negara Nomor 3019) sebagaimana telah diubah dengan Undang-Undang Nomor 16 Tahun 2019 tentang Perubahan Atas Undang-Undang Nomor 1 Tahun 1974 tentang Perkawinan (Lembaran Negara Republik Indonesia Tahun 2019 Nomor 186, Tambahan Lembaran Negara Republik Indonesia Nomor 6401);</p>
-        <p>2. Undang-Undang Nomor 20 Tahun 2023 tentang Aparatur Sipil Negara;</p>
-        <p>3. Undang-Undang Nomor 23 Tahun 2014 tentang Pemerintahan Daerah (Lembaran Negara Republik Indonesia Tahun 2014 Nomor 244, Tambahan Lembaran Negara Republik Indonesia Nomor 5587) sebagaimana telah diubah beberapa kali terakhir dengan Undang-Undang Nomor 9 Tahun 2015 tentang Perubahan Kedua atas Undang-Undang Nomor 23 Tahun 2014 tentang Pemerintahan Daerah (Lembaran Negara Republik Indonesia Tahun 2015 Nomor 58, Tambahan Lembaran Negara Republik Indonesia Nomor 5679);</p>
-        <p>4. Peraturan Pemerintah Nomor 10 Tahun 1983 tentang Izin Perkawinan Dan Perceraian Bagi Pegawai Negeri Sipil (Lembaran Negara Tahun 1983 Nomor 13, Tambahan Lembaran Negara Nomor 3250) jo Peraturan Pemerintah nomor 45 tahun 1990;</p>
-    </div>
-
-    {{-- Memperhatikan --}}
-    <div class="section-title">Memperhatikan</div>
-    <div class="memperhatikan">
-        <p>: Surat Edaran Kepala Badan Administrasi Kepegawaian Negara Nomor: 48/SE/1990, tentang Petunjuk Pelaksanaan Peraturan Pemerintah Republik Indonesia Nomor 45 Tahun 1990.</p>
-    </div>
-
-    {{-- Memutuskan --}}
-    <div class="memutuskan">MEMUTUSKAN:</div>
-
-    <div class="section-title">Menetapkan</div>
-    <div class="section-title" style="text-transform:uppercase;text-align:center;">Pertama</div>
-    <div class="isi-keputusan">
-        <p>Memberikan Izin kepada:</p>
-        <table class="content-table">
-            <tr><td class="lbl">1. Nama</td><td>: {{ $pegawai->nama ?? '-' }}</td></tr>
-            <tr><td>2. NIP</td><td>: {{ $pegawai->nip ?? '-' }}</td></tr>
-            <tr><td>3. Golongan</td><td>: {{ $golText }}</td></tr>
-            <tr><td>4. Jabatan</td><td>: {{ $pegawai->jabatan ?? '-' }}</td></tr>
-            <tr><td>5. Unit Kerja</td><td>: {{ $pegawai->opd ?? '-' }}</td></tr>
-            <tr><td>6. Agama</td><td>: {{ $pegawai->agama ?? '-' }}</td></tr>
-        </table>
-        <p style="margin-top:5px;">Dikabulkan untuk melakukan perceraian dengan {{ $sebutanLawan }}:</p>
-        <table class="content-table">
-            <tr><td class="lbl">1. Nama</td><td>: {{ $namaPasangan }}</td></tr>
-            <tr><td>2. Pekerjaan</td><td>: -</td></tr>
-            <tr><td>3. Agama</td><td>: -</td></tr>
-            <tr><td>4. Alamat</td><td>: -</td></tr>
-        </table>
-    </div>
-
-    <div class="section-title" style="text-transform:uppercase;text-align:center;margin-top:15px;">Kedua</div>
-    <div class="isi-keputusan">
-        <p>Keputusan ini mulai berlaku sejak tanggal ditetapkan.</p>
-    </div>
-
-    <div class="section-title" style="text-transform:uppercase;text-align:center;margin-top:15px;">Ketiga</div>
-    <div class="isi-keputusan">
-        <p>Apabila dikemudian hari ternyata terdapat kekeliruan dalam keputusan ini, akan diadakan perbaikan sebagaimana mestinya.</p>
-    </div>
-
-    <div class="isi-keputusan" style="margin-top:15px;">
-        <p>ASLI Keputusan ini diberikan kepada Pegawai Negeri Sipil yang bersangkutan untuk diketahui dan dipergunakan sebagaimana mestinya.</p>
-    </div>
 
     {{-- Tembusan --}}
     <div class="tembusan">
